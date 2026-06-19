@@ -22,7 +22,7 @@ Token::Token(
 
     verify(curl, secret, host);
 
-    if (get_status() != "NORMAL") {
+    if (!is_valid() || get_status() != "NORMAL") {
         spdlog::info("[Token] The current token is invalid. Generating new token...");
 
         generate(curl, secret, host);

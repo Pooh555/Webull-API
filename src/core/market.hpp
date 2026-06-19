@@ -7,6 +7,7 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
 
 class Market {
 public:
@@ -16,7 +17,23 @@ public:
     Market(const Market&)            = delete;
     Market& operator=(const Market&) = delete;
 
-    void fetch_tick_data(
+    struct TickData {
+        std::string symbol          = "";
+        std::string instrument_id   = "";
+        // std::string price           = "";
+        // std::string open            = "";
+        // std::string high            = "";
+        // std::string low             = "";
+        std::string volume          = "";
+        std::string side            = "";
+        // std::string change          = "";
+        // std::string change_ratio    = "";
+        // std::string pre_close       = "";
+        // std::string last_trade_time = "";
+        std::string trading_session = "";
+    };
+
+    std::vector<TickData> fetch_tick_data(
               CURL*             curl, 
         const Secret&           secret, 
         const std::string&      token, 
