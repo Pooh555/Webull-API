@@ -225,6 +225,32 @@ std::string compute_md5(const std::string& data) {
     return md5_str;
 }
 
+curl_slist* generate_headers(
+          curl_slist*  raw_headers,
+    const Secret&      secret,
+    const std::string& timestamp,
+    const std::string& nonce,
+    const std::string& signature,
+    const std::string& token) {
+    raw_headers = curl_slist_append(raw_headers, "Accept: application/json");
+    raw_headers = curl_slist_append(raw_headers, "Content-Type: application/json"); 
+    raw_headers = curl_slist_append(raw_headers, "User-Agent: WebullBot/1.0 (C++23 Client)");
+    raw_headers = curl_slist_append(raw_headers, ("x-app-key: " + secret.get_key()).c_str());
+    raw_headers = curl_slist_append(raw_headers, ("x-timestamp: " + timestamp).c_str());
+    raw_headers = curl_slist_append(raw_headers, "x-signature-version: 1.0");
+    raw_headers = curl_slist_append(raw_headers, "x-signature-algorithm: HMAC-SHA1");
+    raw_headers = curl_slist_append(raw_headers, ("x-signature-nonce: " + nonce).c_str());
+    
+    if (!token.empty()) raw_headers = curl_slist_append(raw_headers, ("x-access-token: " + std::string(token)).c_str());
+
+    raw_headers = curl_slist_append(raw_headers, "x-version: v2");
+    raw_headers = curl_slist_append(raw_headers, ("x-signature: " + signature).c_str());
+
+    if (raw_headers != nullptr) spdlog::info("[Utilities] Successfully generated HTTP headers");
+
+    return raw_headers;
+}
+
 size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp) {
     ((std::string*)userp)->append((char*)contents, size * nmemb);
     return size * nmemb;

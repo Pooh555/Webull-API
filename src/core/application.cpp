@@ -71,10 +71,4 @@ void Application::run() {
         "185.50",                      // limit_price string metric
         ""                             // stop_price: Empty
     );
-
-    if (!preview_json.empty()) {
-        spdlog::info("[Application] Received Order Preview Payload:\n{}", preview_json);
-    } else {
-        spdlog::error("[Application] Failed to retrieve valid order preview metrics.");
-    }
 }

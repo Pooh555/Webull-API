@@ -75,14 +75,13 @@ void Token::generate(CURL* curl, const Secret& secret, const std::string_view& h
     curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
 
     curl_slist* raw_headers = nullptr;
-    raw_headers = curl_slist_append(raw_headers, "Accept: application/json");
-    raw_headers = curl_slist_append(raw_headers, ("x-app-key: " + secret.get_key()).c_str());
-    raw_headers = curl_slist_append(raw_headers, ("x-timestamp: " + timestamp).c_str());
-    raw_headers = curl_slist_append(raw_headers, "x-signature-version: 1.0");
-    raw_headers = curl_slist_append(raw_headers, "x-signature-algorithm: HMAC-SHA1");
-    raw_headers = curl_slist_append(raw_headers, ("x-signature-nonce: " + nonce).c_str());
-    raw_headers = curl_slist_append(raw_headers, "x-version: v2");
-    raw_headers = curl_slist_append(raw_headers, ("x-signature: " + signature).c_str());
+    raw_headers = utilities::generate_headers(
+        raw_headers, 
+        secret, 
+        timestamp, 
+        nonce, 
+        signature,
+        "");
 
     spdlog::debug("[Token] timestamp: {}", timestamp);
     spdlog::debug("[Token] nonce: {}", nonce);
@@ -169,16 +168,13 @@ void Token::verify(CURL* curl, const Secret& secret, const std::string_view& hos
     curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
 
     curl_slist* raw_headers = nullptr;
-    raw_headers = curl_slist_append(raw_headers, "Content-Type: application/json");
-    raw_headers = curl_slist_append(raw_headers, "Accept: application/json");
-    raw_headers = curl_slist_append(raw_headers, ("x-app-key: " + secret.get_key()).c_str());
-    raw_headers = curl_slist_append(raw_headers, ("x-timestamp: " + timestamp).c_str());
-    raw_headers = curl_slist_append(raw_headers, "x-signature-version: 1.0");
-    raw_headers = curl_slist_append(raw_headers, "x-signature-algorithm: HMAC-SHA1");
-    raw_headers = curl_slist_append(raw_headers, ("x-signature-nonce: " + nonce).c_str());
-    raw_headers = curl_slist_append(raw_headers, "x-version: v2");
-    raw_headers = curl_slist_append(raw_headers, ("x-signature: " + signature).c_str());
-
+    raw_headers = utilities::generate_headers(
+        raw_headers, 
+        secret, 
+        timestamp, 
+        nonce, 
+        signature,
+        "");
     spdlog::debug("[Token] timestamp: {}", timestamp);
     spdlog::debug("[Token] nonce: {}", nonce);
     spdlog::debug("[Token] signature: {}", signature);

@@ -1,14 +1,16 @@
 #include "trading.hpp"
+
 #include "utilities/utilities.hpp"
 
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
+
 #include <memory>
 
 namespace trading {
     
 std::string get_account_list(
-          CURL* curl,
+          CURL*             curl,
     const Secret&           secret,
     const std::string_view& host,
     const std::string&      token) {
@@ -28,7 +30,15 @@ std::string get_account_list(
     static constexpr std::string_view ACCOUNT_LIST_PATH = "/openapi/account/list";
 
     std::string signature = utilities::generate_openapi_signature(
-        curl, secret.get_key(), secret.get_secret(), nonce, timestamp, host, ACCOUNT_LIST_PATH, query_parameters, ""
+        curl, 
+        secret.get_key(), 
+        secret.get_secret(), 
+        nonce, 
+        timestamp, 
+        host, 
+        ACCOUNT_LIST_PATH, 
+        query_parameters, 
+        ""
     );
 
     std::string url = "https://" + std::string(host) + std::string(ACCOUNT_LIST_PATH);
@@ -38,17 +48,14 @@ std::string get_account_list(
     curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
 
     curl_slist* raw_headers = nullptr;
-    raw_headers = curl_slist_append(raw_headers, "Accept: application/json");
-    raw_headers = curl_slist_append(raw_headers, "User-Agent: WebullBot/1.0 (C++23 Client)");
-    raw_headers = curl_slist_append(raw_headers, ("x-app-key: " + secret.get_key()).c_str());
-    raw_headers = curl_slist_append(raw_headers, ("x-timestamp: " + timestamp).c_str());
-    raw_headers = curl_slist_append(raw_headers, "x-signature-version: 1.0");
-    raw_headers = curl_slist_append(raw_headers, "x-signature-algorithm: HMAC-SHA1");
-    raw_headers = curl_slist_append(raw_headers, ("x-signature-nonce: " + nonce).c_str());
-    raw_headers = curl_slist_append(raw_headers, ("x-access-token: " + token).c_str());
-    raw_headers = curl_slist_append(raw_headers, "x-version: v2");
-    raw_headers = curl_slist_append(raw_headers, ("x-signature: " + signature).c_str());
-
+    raw_headers = utilities::generate_headers(
+        raw_headers, 
+        secret, 
+        timestamp, 
+        nonce, 
+        signature,
+        static_cast<std::string>(token));
+        
     auto header_guard = std::unique_ptr<curl_slist, void(*)(curl_slist*)>(
         raw_headers, 
         [](curl_slist* h) { curl_slist_free_all(h); }
@@ -57,6 +64,7 @@ std::string get_account_list(
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_guard.get());
     
     std::string response_message { "" };
+
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, utilities::write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_message);
 
@@ -69,6 +77,14 @@ std::string get_account_list(
         
         if (http_code == 200L) {
             spdlog::info("[Trading] Successfully retrieved Webull account collection mappings");
+            
+            try {
+                auto json_response = nlohmann::json::parse(response_message);
+                spdlog::info("[Trading] Account List Response:\n{}", json_response.dump(4));
+            } catch (const nlohmann::json::parse_error& e) {
+                spdlog::warn("[Trading] Failed to parse JSON account list response: {}", e.what());
+                spdlog::info("[Trading] Raw Response: {}", response_message);
+            }
         } else {
             spdlog::error("[Trading] Account list fetch rejected. HTTP {}: {}", http_code, response_message);
         }
@@ -82,10 +98,10 @@ std::string get_account_list(
 }
 
 std::string preview_order(
-    CURL* curl, 
+    CURL*            curl, 
     const Secret&    secret, 
     std::string_view host, 
-    std::string_view access_token,
+    std::string_view token,
     std::string_view account_id,            
     std::string_view combo_type,
     std::string_view client_order_id,
@@ -159,17 +175,13 @@ std::string preview_order(
     curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
 
     curl_slist* raw_headers = nullptr;
-    raw_headers = curl_slist_append(raw_headers, "Accept: application/json");
-    raw_headers = curl_slist_append(raw_headers, "Content-Type: application/json"); 
-    raw_headers = curl_slist_append(raw_headers, "User-Agent: WebullBot/1.0 (C++23 Client)");
-    raw_headers = curl_slist_append(raw_headers, ("x-app-key: " + secret.get_key()).c_str());
-    raw_headers = curl_slist_append(raw_headers, ("x-timestamp: " + timestamp).c_str());
-    raw_headers = curl_slist_append(raw_headers, "x-signature-version: 1.0");
-    raw_headers = curl_slist_append(raw_headers, "x-signature-algorithm: HMAC-SHA1");
-    raw_headers = curl_slist_append(raw_headers, ("x-signature-nonce: " + nonce).c_str());
-    raw_headers = curl_slist_append(raw_headers, ("x-access-token: " + std::string(access_token)).c_str());
-    raw_headers = curl_slist_append(raw_headers, "x-version: v2");
-    raw_headers = curl_slist_append(raw_headers, ("x-signature: " + signature).c_str());
+    raw_headers = utilities::generate_headers(
+        raw_headers, 
+        secret, 
+        timestamp, 
+        nonce, 
+        signature,
+        static_cast<std::string>(token));
 
     auto header_guard = std::unique_ptr<curl_slist, void(*)(curl_slist*)>(
         raw_headers, 
@@ -192,6 +204,13 @@ std::string preview_order(
         
         if (http_code == 200L) {
             spdlog::info("[Trading] Successfully retrieved order preview calculations");
+            try {
+                auto json_response = nlohmann::json::parse(response_message);
+                spdlog::info("[Trading] Order Preview Response:\n{}", json_response.dump(4));
+            } catch (const nlohmann::json::parse_error& e) {
+                spdlog::warn("[Trading] Failed to parse JSON order preview response: {}", e.what());
+                spdlog::info("[Trading] Raw Response: {}", response_message);
+            }
         } else {
             spdlog::error("[Trading] Order preview rejected. HTTP {}: {}", http_code, response_message);
         }

@@ -18,7 +18,7 @@ std::string preview_order(
     CURL*            curl, 
     const Secret&    secret, 
     std::string_view host, 
-    std::string_view access_token,
+    std::string_view token,
     std::string_view account_id,            
     std::string_view combo_type,
     std::string_view client_order_id,
