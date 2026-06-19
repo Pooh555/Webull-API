@@ -15,20 +15,13 @@ Application::Application() {
 Application::~Application() {}
 
 void Application::run() {
-
-    spdlog::info("Token: {}", token->get_handle());
-    
-    token->verify(curl->get_handle(), *secret.get(), HOST);
-
-    spdlog::info("[Application] Token is ACTIVE! Proceeding to fetch market data.");
-
-    // market->fetch_tick_data(
-    //     curl->get_handle(), 
-    //     *secret.get(),
-    //     token->get_handle(),
-    //     "AAPL",
-    //     "US_STOCK",
-    //     "30",
-    //     "RTH",
-    //     HOST);
+    market->fetch_tick_data(
+        curl->get_handle(), 
+        *secret.get(),
+        token->get_handle(),
+        "AAPL",
+        "US_STOCK",
+        "30",
+        "RTH",
+        HOST);
 }
