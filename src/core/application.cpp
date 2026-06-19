@@ -43,32 +43,68 @@ void Application::run() {
     }
 
     if (extracted_account_id.empty()) {
-        spdlog::error("[Application] Could not determine a valid account ID target mapping. Aborting preview request.");
+        spdlog::error("[Application] Could not determine a valid account ID target mapping. Aborting request pipeline.");
         return;
     }
 
-    spdlog::info("[Application] Target localized. Executing preview for account: {}", extracted_account_id);
+    spdlog::info("[Application] Target localized: {}. Executing order placement for SSG...", extracted_account_id);
 
     std::string client_order_id = utilities::generate_nonce(26uz);
 
-    std::string preview_json = trading::preview_order(
-        curl->get_handle(),            // CURL* handle
-        *secret.get(),                 // Const Secret& reference
-        HOST,                          // String view of the base host domain
-        token->get_handle(),           // Retrieved OAuth Access Token string
-        extracted_account_id,          // Valid extracted account_id parameter target
-        "NORMAL",                      // combo_type: Single standalone order execution
-        client_order_id,               // client_order_id: Unique string reference
-        "EQUITY",                      // instrument_type: US Stocks/ETFs
-        "US",                          // market: Trading venue region
-        "AAPL",                        // symbol: Ticker
-        "LIMIT",                       // order_type: LIMIT pricing order logic block
-        "QTY",                         // entrust_type: Quantity based purchase
-        "CORE",                        // support_trading_session: Standard execution hours
-        "DAY",                         // time_in_force: Current trading day duration limits
-        "BUY",                         // side: Purchase order action
-        "10",                          // quantity: units metrics target size
-        "185.50",                      // limit_price string metric
-        ""                             // stop_price: Empty
+    std::string place_json = trading::place_order(
+        curl->get_handle(),            
+        *secret.get(),                 
+        HOST,                          
+        token->get_handle(),           
+        extracted_account_id,          
+        "NORMAL",                      
+        client_order_id,               
+        "EQUITY",                      
+        "US",                          
+        "SSG",                        
+        "LIMIT",                       
+        "QTY",                         
+        "CORE",                        
+        "DAY",                         
+        "BUY",                         
+        "1",                          
+        "11.20",                      
+        ""                             
+    );
+
+    if (place_json.empty()) {
+        spdlog::error("[Application] Order placement failed. Aborting demo workflow sequence.");
+        return;
+    }
+
+    spdlog::info("[Application] Modifying placed order reference: {}", client_order_id);
+
+    std::string modify_json = trading::modify_order(
+        curl->get_handle(),
+        *secret.get(),
+        HOST,
+        token->get_handle(),
+        extracted_account_id,
+        client_order_id,
+        "1",
+        "11.30",
+        "",
+        "DAY"
+    );
+
+    if (modify_json.empty()) {
+        spdlog::error("[Application] Order modification failed. Aborting demo workflow sequence.");
+        return;
+    }
+
+    spdlog::info("[Application] Cancelling order reference: {}", client_order_id);
+
+    std::string cancel_json = trading::cancel_order(
+        curl->get_handle(),
+        *secret.get(),
+        HOST,
+        token->get_handle(),
+        extracted_account_id,
+        client_order_id
     );
 }
