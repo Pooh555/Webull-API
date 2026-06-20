@@ -7,6 +7,7 @@
 
 #include <filesystem>
 #include <string>
+#include <string_view>
 
 namespace utilities {
     
@@ -16,7 +17,7 @@ void            write_json(const nlohmann::json& json, const std::filesystem::pa
 [[nodiscard]] std::string get_utc_timestamp();
 [[nodiscard]] std::string generate_nonce(size_t length = 0uz);
 [[nodiscard]] std::string generate_openapi_signature(
-          CURL*                                             curl,
+          CURL* curl,
     const std::string&                                      app_key,
     const std::string&                                      app_secret,
     const std::string&                                      nonce,
@@ -28,14 +29,22 @@ void            write_json(const nlohmann::json& json, const std::filesystem::pa
 [[nodiscard]] std::string compute_hmac_sha1(const std::string& key, const std::string& message);
 [[nodiscard]] std::string compute_hmac_sha256(const std::string& key, const std::string& message);
 [[nodiscard]] std::string compute_md5(const std::string& data);
-              curl_slist* generate_headers(
+
+size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp);
+
+[[nodiscard]] std::string execute_request(
+          CURL*            curl, 
+    const Secret&          secret, 
+          std::string_view host, 
+          std::string_view path, 
+          bool             is_post, 
+    const std::string&     body_str = "",
+    const std::string&     token    = "");
+curl_slist* generate_headers(
           curl_slist*  raw_headers,
     const Secret&      secret,
     const std::string& timestamp,
     const std::string& nonce,
     const std::string& signature,
     const std::string& token);
-
-size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp);
-
 }

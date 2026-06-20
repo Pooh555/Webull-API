@@ -4,10 +4,9 @@
 
 #include <curl/curl.h>
 
-#include <string>
 #include <optional>
-
-namespace trading {
+#include <string>
+#include <string_view>
 
 struct OrderRequest {
     std::string           account_id              = "";            
@@ -26,35 +25,30 @@ struct OrderRequest {
     std::optional<double> stop_price              = std::nullopt;  
 };
 
-std::string get_account_list(
-          CURL*             curl,
-    const Secret&           secret,
-    const std::string_view& host,
-    const std::string_view& token
-);
-std::string preview_order(
-          CURL*             curl, 
-    const Secret&           secret, 
-    const std::string_view& host, 
-    const std::string_view& token,
-    const OrderRequest&     request);
-std::string place_order(
-          CURL*             curl, 
-    const Secret&           secret, 
-    const std::string_view& host, 
-    const std::string_view& token,
-    const OrderRequest&     request);
-std::string modify_order(
-          CURL*             curl, 
-    const Secret&           secret, 
-    const std::string_view& host, 
-    const std::string_view& token,
-    const OrderRequest&     request);
-std::string cancel_order(
-          CURL*             curl, 
-    const Secret&           secret, 
-    const std::string_view& host, 
-    const std::string_view& token,
-    const OrderRequest&     request);
+class TradingClient {
+public:
+    TradingClient(
+              CURL* curl, 
+        const Secret&          secret, 
+              std::string_view host, 
+              std::string_view token);
+    ~TradingClient() = default;
 
-}
+    std::string get_account_list();
+    std::string preview_order(const OrderRequest& request);
+    std::string place_order(const OrderRequest& request);
+    std::string modify_order(const OrderRequest& request);
+    std::string cancel_order(const OrderRequest& request);
+
+private:
+    static constexpr std::string_view ACCOUNT_LIST_PATH  = "/openapi/account/list";
+    static constexpr std::string_view PREVIEW_ORDER_PATH = "/openapi/trade/order/preview";
+    static constexpr std::string_view PLACE_ORDER_PATH   = "/openapi/trade/order/place";
+    static constexpr std::string_view MODIFY_ORDER_PATH  = "/openapi/trade/order/replace";
+    static constexpr std::string_view CANCEL_ORDER_PATH  = "/openapi/trade/order/cancel";
+
+          CURL*        curl_;
+    const Secret&      secret_;
+          std::string  host_;
+          std::string  token_;
+};

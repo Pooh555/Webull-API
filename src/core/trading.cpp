@@ -1,532 +1,93 @@
 #include "trading.hpp"
-
 #include "utilities/utilities.hpp"
 
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 
-#include <memory>
 #include <format>
 
-namespace trading {
-    
-std::string get_account_list(
-          CURL*             curl,
-    const Secret&           secret,
-    const std::string_view& host,
-    const std::string_view& token) {
-    if (curl == nullptr) {
-        spdlog::error("[Trading] Passed a null curl pointer to get_account_list()");
-        return "";
-    }
-    
-    curl_easy_setopt(curl, CURLOPT_POST, 0L);
-    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, nullptr);
+TradingClient::TradingClient(CURL* curl, const Secret& secret, std::string_view host, std::string_view token)
+    : curl_(curl), secret_(secret), host_(host), token_(token) {}
 
-    std::string timestamp = utilities::get_utc_timestamp();
-    std::string nonce     = utilities::generate_nonce(26uz);
-    
-    std::vector<std::pair<std::string, std::string>> query_parameters {};
-    static constexpr std::string_view ACCOUNT_LIST_PATH = "/openapi/account/list";
-
-    std::string signature = utilities::generate_openapi_signature(
-        curl, 
-        secret.get_key(), 
-        secret.get_secret(), 
-        nonce, 
-        timestamp, 
-        host, 
-        ACCOUNT_LIST_PATH, 
-        query_parameters, 
-        ""
-    );
-
-    std::string url = "https://" + std::string(host) + std::string(ACCOUNT_LIST_PATH);
-
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
-
-    curl_slist* raw_headers = nullptr;
-    raw_headers = utilities::generate_headers(
-        raw_headers, 
-        secret, 
-        timestamp, 
-        nonce, 
-        signature,
-        static_cast<std::string>(token));
-        
-    auto header_guard = std::unique_ptr<curl_slist, void(*)(curl_slist*)>(
-        raw_headers, 
-        [](curl_slist* h) { curl_slist_free_all(h); }
-    );
-
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_guard.get());
-    
-    std::string response_message { "" };
-
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, utilities::write_callback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_message);
-
-    CURLcode response_code = curl_easy_perform(curl);
-
-    if (response_code == CURLE_OK) {
-        long int http_code { 0L };
-
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-        
-        if (http_code == 200L) {
-            spdlog::info("[Trading] Successfully retrieved Webull account collection mappings");
-            
-            try {
-                auto json_response = nlohmann::json::parse(response_message);
-                spdlog::info("[Trading] Account List Response:\n{}", json_response.dump(4));
-            } catch (const nlohmann::json::parse_error& e) {
-                spdlog::warn("[Trading] Failed to parse JSON account list response: {}", e.what());
-                spdlog::info("[Trading] Raw Response: {}", response_message);
-            }
-        } else {
-            spdlog::error("[Trading] Account list fetch rejected. HTTP {}: {}", http_code, response_message);
-        }
-    } else {
-        spdlog::error("[Trading] Curl routing execution failed: {}", curl_easy_strerror(response_code));
-    }
-
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, nullptr);
-
-    return response_message;
+std::string TradingClient::get_account_list() {
+    return utilities::execute_request(curl_, secret_, host_, ACCOUNT_LIST_PATH, false, "", token_);
 }
 
-std::string preview_order(
-          CURL*             curl, 
-    const Secret&           secret, 
-    const std::string_view& host, 
-    const std::string_view& token,
-    const OrderRequest&     request) { 
-    if (curl == nullptr) {
-        spdlog::error("[Trading] Passed a null curl pointer to preview_order()");
-        return "";
-    }
-    
-    curl_easy_setopt(curl, CURLOPT_HTTPGET, 0L);
-    curl_easy_setopt(curl, CURLOPT_POST, 1L);
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, nullptr);
-
-    std::string timestamp = utilities::get_utc_timestamp();
-    std::string nonce     = utilities::generate_nonce(26uz);
-    
+std::string TradingClient::preview_order(const OrderRequest& request) {
     nlohmann::json order_item {
-        {"combo_type",              std::string(request.combo_type)},
-        {"client_order_id",         std::string(request.client_order_id)},
-        {"instrument_type",         std::string(request.instrument_type)},
-        {"market",                  std::string(request.market)},
-        {"symbol",                  std::string(request.symbol)},
-        {"order_type",              std::string(request.order_type)},
-        {"entrust_type",            std::string(request.entrust_type)},
-        {"support_trading_session", std::string(request.support_trading_session)},
-        {"time_in_force",           std::string(request.time_in_force)},
-        {"side",                    std::string(request.side)}
+        {"combo_type",              request.combo_type},
+        {"client_order_id",         request.client_order_id},
+        {"instrument_type",         request.instrument_type},
+        {"market",                  request.market},
+        {"symbol",                  request.symbol},
+        {"order_type",              request.order_type},
+        {"entrust_type",            request.entrust_type},
+        {"support_trading_session", request.support_trading_session},
+        {"time_in_force",           request.time_in_force},
+        {"side",                    request.side}
     };
 
-    if (request.quantity.has_value())    order_item["quantity"]    = std::format("{}", *request.quantity);
-    if (request.limit_price.has_value()) order_item["limit_price"] = std::format("{:.2f}", *request.limit_price);
-    if (request.stop_price.has_value())  order_item["stop_price"]  = std::format("{:.2f}", *request.stop_price);
+    if (request.quantity)    order_item["quantity"]    = std::format("{}", *request.quantity);
+    if (request.limit_price) order_item["limit_price"] = std::format("{:.2f}", *request.limit_price);
+    if (request.stop_price)  order_item["stop_price"]  = std::format("{:.2f}", *request.stop_price);
 
     nlohmann::json root_payload {
-        {"account_id", std::string(request.account_id)},
+        {"account_id", request.account_id},
         {"new_orders", nlohmann::json::array({order_item})}
     };
 
-    std::string body_str = root_payload.dump();
-    std::vector<std::pair<std::string, std::string>> query_parameters {};
-
-    static constexpr std::string_view ORDER_PREVIEW_PATH = "/openapi/trade/order/preview";
-
-    std::string signature = utilities::generate_openapi_signature(
-        curl, 
-        secret.get_key(), 
-        secret.get_secret(), 
-        nonce, 
-        timestamp, 
-        host, 
-        ORDER_PREVIEW_PATH, 
-        query_parameters, 
-        body_str
-    );
-
-    std::string url = "https://" + std::string(host) + std::string(ORDER_PREVIEW_PATH);
-
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body_str.c_str());
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
-
-    curl_slist* raw_headers = nullptr;
-    raw_headers = utilities::generate_headers(
-        raw_headers, 
-        secret, 
-        timestamp, 
-        nonce, 
-        signature,
-        static_cast<std::string>(token));
-
-    auto header_guard = std::unique_ptr<curl_slist, void(*)(curl_slist*)>(
-        raw_headers, 
-        [](curl_slist* h) { curl_slist_free_all(h); }
-    );
-
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_guard.get());
-    
-    std::string response_message { "" };
-
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, utilities::write_callback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_message);
-
-    CURLcode response_code = curl_easy_perform(curl);
-
-    if (response_code == CURLE_OK) {
-        long int http_code { 0L };
-
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-        
-        if (http_code == 200L) {
-            spdlog::info("[Trading] Successfully retrieved order preview calculations");
-            try {
-                auto json_response = nlohmann::json::parse(response_message);
-                spdlog::info("[Trading] Order Preview Response:\n{}", json_response.dump(4));
-            } catch (const nlohmann::json::parse_error& e) {
-                spdlog::warn("[Trading] Failed to parse JSON order preview response: {}", e.what());
-                spdlog::info("[Trading] Raw Response: {}", response_message);
-            }
-        } else {
-            spdlog::error("[Trading] Order preview rejected. HTTP {}: {}", http_code, response_message);
-        }
-    } else {
-        spdlog::error("[Trading] Curl transmission failed: {}", curl_easy_strerror(response_code));
-    }
-
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, nullptr);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, nullptr);
-
-    return response_message;
+    return utilities::execute_request(curl_, secret_, host_, PREVIEW_ORDER_PATH, true, root_payload.dump(), token_);
 }
 
-std::string place_order(
-          CURL*             curl, 
-    const Secret&           secret, 
-    const std::string_view& host, 
-    const std::string_view& token,
-    const OrderRequest&     request) {
-    if (curl == nullptr) {
-        spdlog::error("[Trading] Passed a null curl pointer to place_order()");
-        return "";
-    }
-    
-    curl_easy_setopt(curl, CURLOPT_HTTPGET, 0L);
-    curl_easy_setopt(curl, CURLOPT_POST, 1L);
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, nullptr);
-
-    std::string timestamp = utilities::get_utc_timestamp();
-    std::string nonce     = utilities::generate_nonce(26uz);
-    
+std::string TradingClient::place_order(const OrderRequest& request) {
     nlohmann::json order_item {
-        {"combo_type",              std::string(request.combo_type)},
-        {"client_order_id",         std::string(request.client_order_id)},
-        {"instrument_type",         std::string(request.instrument_type)},
-        {"market",                  std::string(request.market)},
-        {"symbol",                  std::string(request.symbol)},
-        {"order_type",              std::string(request.order_type)},
-        {"entrust_type",            std::string(request.entrust_type)},
-        {"support_trading_session", std::string(request.support_trading_session)},
-        {"time_in_force",           std::string(request.time_in_force)},
-        {"side",                    std::string(request.side)}
+        {"combo_type",              request.combo_type},
+        {"client_order_id",         request.client_order_id},
+        {"instrument_type",         request.instrument_type},
+        {"market",                  request.market},
+        {"symbol",                  request.symbol},
+        {"order_type",              request.order_type},
+        {"entrust_type",            request.entrust_type},
+        {"support_trading_session", request.support_trading_session},
+        {"time_in_force",           request.time_in_force},
+        {"side",                    request.side}
     };
 
-    if (request.quantity.has_value())    order_item["quantity"]    = std::format("{}", *request.quantity);
-    if (request.limit_price.has_value()) order_item["limit_price"] = std::format("{:.2f}", *request.limit_price);
-    if (request.stop_price.has_value())  order_item["stop_price"]  = std::format("{:.2f}", *request.stop_price);
+    if (request.quantity)    order_item["quantity"]    = std::format("{}", *request.quantity);
+    if (request.limit_price) order_item["limit_price"] = std::format("{:.2f}", *request.limit_price);
+    if (request.stop_price)  order_item["stop_price"]  = std::format("{:.2f}", *request.stop_price);
 
     nlohmann::json root_payload {
-        {"account_id", std::string(request.account_id)},
+        {"account_id", request.account_id},
         {"new_orders", nlohmann::json::array({order_item})}
     };
 
-    std::string body_str = root_payload.dump();
-    std::vector<std::pair<std::string, std::string>> query_parameters {};
-
-    static constexpr std::string_view ORDER_PLACE_PATH = "/openapi/trade/order/place";
-
-    std::string signature = utilities::generate_openapi_signature(
-        curl, 
-        secret.get_key(), 
-        secret.get_secret(), 
-        nonce, 
-        timestamp, 
-        host, 
-        ORDER_PLACE_PATH, 
-        query_parameters, 
-        body_str
-    );
-
-    std::string url = "https://" + std::string(host) + std::string(ORDER_PLACE_PATH);
-
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body_str.c_str());
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
-
-    curl_slist* raw_headers = nullptr;
-    raw_headers = utilities::generate_headers(
-        raw_headers, 
-        secret, 
-        timestamp, 
-        nonce, 
-        signature,
-        static_cast<std::string>(token));
-
-    auto header_guard = std::unique_ptr<curl_slist, void(*)(curl_slist*)>(
-        raw_headers, 
-        [](curl_slist* h) { curl_slist_free_all(h); }
-    );
-
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_guard.get());
-    
-    std::string response_message { "" };
-
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, utilities::write_callback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_message);
-
-    CURLcode response_code = curl_easy_perform(curl);
-
-    if (response_code == CURLE_OK) {
-        long int http_code { 0L };
-
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-        
-        if (http_code == 200L) {
-            spdlog::info("[Trading] Successfully executed order placement");
-            try {
-                auto json_response = nlohmann::json::parse(response_message);
-                spdlog::info("[Trading] Order Place Response:\n{}", json_response.dump(4));
-            } catch (const nlohmann::json::parse_error& e) {
-                spdlog::warn("[Trading] Failed to parse JSON order place response: {}", e.what());
-                spdlog::info("[Trading] Raw Response: {}", response_message);
-            }
-        } else {
-            spdlog::error("[Trading] Order placement rejected. HTTP {}: {}", http_code, response_message);
-        }
-    } else {
-        spdlog::error("[Trading] Curl transmission failed: {}", curl_easy_strerror(response_code));
-    }
-
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, nullptr);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, nullptr);
-
-    return response_message;
+    return utilities::execute_request(curl_, secret_, host_, PLACE_ORDER_PATH, true, root_payload.dump(), token_);
 }
 
-std::string modify_order(
-          CURL*             curl, 
-    const Secret&           secret, 
-    const std::string_view& host, 
-    const std::string_view& token,
-    const OrderRequest&     request) {
-    if (curl == nullptr) {
-        spdlog::error("[Trading] Passed a null curl pointer to modify_order()");
-        return "";
-    }
-    
-    curl_easy_setopt(curl, CURLOPT_HTTPGET, 0L);
-    curl_easy_setopt(curl, CURLOPT_POST, 1L);
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, nullptr);
-
-    std::string timestamp = utilities::get_utc_timestamp();
-    std::string nonce     = utilities::generate_nonce(26uz);
-    
+std::string TradingClient::modify_order(const OrderRequest& request) {
     nlohmann::json modify_item {
-        {"client_order_id", std::string(request.client_order_id)}
+        {"client_order_id", request.client_order_id}
     };
 
-    if (request.quantity.has_value())      modify_item["quantity"]      = std::format("{}", *request.quantity);
-    if (request.limit_price.has_value())   modify_item["limit_price"]   = std::format("{:.2f}", *request.limit_price);
-    if (request.stop_price.has_value())    modify_item["stop_price"]    = std::format("{:.2f}", *request.stop_price);
-    if (!request.time_in_force.empty()) modify_item["time_in_force"] = std::string(request.time_in_force);
+    if (request.quantity)               modify_item["quantity"]      = std::format("{}", *request.quantity);
+    if (request.limit_price)            modify_item["limit_price"]   = std::format("{:.2f}", *request.limit_price);
+    if (request.stop_price)             modify_item["stop_price"]    = std::format("{:.2f}", *request.stop_price);
+    if (!request.time_in_force.empty()) modify_item["time_in_force"] = request.time_in_force;
 
     nlohmann::json root_payload {
-        {"account_id", std::string(request.account_id)},
+        {"account_id", request.account_id},
         {"modify_orders", nlohmann::json::array({modify_item})}
     };
 
-    std::string body_str = root_payload.dump();
-    std::vector<std::pair<std::string, std::string>> query_parameters {};
-
-    static constexpr std::string_view ORDER_REPLACE_PATH = "/openapi/trade/order/replace";
-
-    std::string signature = utilities::generate_openapi_signature(
-        curl, 
-        secret.get_key(), 
-        secret.get_secret(), 
-        nonce, 
-        timestamp, 
-        host, 
-        ORDER_REPLACE_PATH, 
-        query_parameters, 
-        body_str
-    );
-
-    std::string url = "https://" + std::string(host) + std::string(ORDER_REPLACE_PATH);
-
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body_str.c_str());
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
-
-    curl_slist* raw_headers = nullptr;
-    raw_headers = utilities::generate_headers(
-        raw_headers, 
-        secret, 
-        timestamp, 
-        nonce, 
-        signature,
-        static_cast<std::string>(token));
-
-    auto header_guard = std::unique_ptr<curl_slist, void(*)(curl_slist*)>(
-        raw_headers, 
-        [](curl_slist* h) { curl_slist_free_all(h); }
-    );
-
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_guard.get());
-    
-    std::string response_message { "" };
-
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, utilities::write_callback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_message);
-
-    CURLcode response_code = curl_easy_perform(curl);
-
-    if (response_code == CURLE_OK) {
-        long int http_code { 0L };
-
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-        
-        if (http_code == 200L) {
-            spdlog::info("[Trading] Successfully executed order modification");
-            try {
-                auto json_response = nlohmann::json::parse(response_message);
-                spdlog::info("[Trading] Order Modify Response:\n{}", json_response.dump(4));
-            } catch (const nlohmann::json::parse_error& e) {
-                spdlog::warn("[Trading] Failed to parse JSON order modification response: {}", e.what());
-                spdlog::info("[Trading] Raw Response: {}", response_message);
-            }
-        } else {
-            spdlog::error("[Trading] Order modification rejected. HTTP {}: {}", http_code, response_message);
-        }
-    } else {
-        spdlog::error("[Trading] Curl transmission failed: {}", curl_easy_strerror(response_code));
-    }
-
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, nullptr);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, nullptr);
-
-    return response_message;
+    return utilities::execute_request(curl_, secret_, host_, MODIFY_ORDER_PATH, true, root_payload.dump(), token_);
 }
 
-std::string cancel_order(
-          CURL*             curl, 
-    const Secret&           secret, 
-    const std::string_view& host, 
-    const std::string_view& token,
-    const OrderRequest&     request) {
-    if (curl == nullptr) {
-        spdlog::error("[Trading] Passed a null curl pointer to cancel_order()");
-        return "";
-    }
-    
-    curl_easy_setopt(curl, CURLOPT_HTTPGET, 0L);
-    curl_easy_setopt(curl, CURLOPT_POST, 1L);
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, nullptr);
-
-    std::string timestamp = utilities::get_utc_timestamp();
-    std::string nonce     = utilities::generate_nonce(26uz);
-    
+std::string TradingClient::cancel_order(const OrderRequest& request) {
     nlohmann::json root_payload {
-        {"account_id", std::string(request.account_id)},
-        {"client_order_id", std::string(request.client_order_id)}
+        {"account_id", request.account_id},
+        {"client_order_id", request.client_order_id}
     };
 
-    std::string body_str = root_payload.dump();
-    std::vector<std::pair<std::string, std::string>> query_parameters {};
-
-    static constexpr std::string_view ORDER_CANCEL_PATH = "/openapi/trade/order/cancel";
-
-    std::string signature = utilities::generate_openapi_signature(
-        curl, 
-        secret.get_key(), 
-        secret.get_secret(), 
-        nonce, 
-        timestamp, 
-        host, 
-        ORDER_CANCEL_PATH, 
-        query_parameters, 
-        body_str
-    );
-
-    std::string url = "https://" + std::string(host) + std::string(ORDER_CANCEL_PATH);
-
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body_str.c_str());
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
-
-    curl_slist* raw_headers = nullptr;
-    raw_headers = utilities::generate_headers(
-        raw_headers, 
-        secret, 
-        timestamp, 
-        nonce, 
-        signature,
-        static_cast<std::string>(token));
-
-    auto header_guard = std::unique_ptr<curl_slist, void(*)(curl_slist*)>(
-        raw_headers, 
-        [](curl_slist* h) { curl_slist_free_all(h); }
-    );
-
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_guard.get());
-    
-    std::string response_message { "" };
-
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, utilities::write_callback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_message);
-
-    CURLcode response_code = curl_easy_perform(curl);
-
-    if (response_code == CURLE_OK) {
-        long int http_code { 0L };
-
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-        
-        if (http_code == 200L) {
-            spdlog::info("[Trading] Successfully executed order cancellation");
-            try {
-                auto json_response = nlohmann::json::parse(response_message);
-                spdlog::info("[Trading] Order Cancel Response:\n{}", json_response.dump(4));
-            } catch (const nlohmann::json::parse_error& e) {
-                spdlog::warn("[Trading] Failed to parse JSON order cancellation response: {}", e.what());
-                spdlog::info("[Trading] Raw Response: {}", response_message);
-            }
-        } else {
-            spdlog::error("[Trading] Order cancellation rejected. HTTP {}: {}", http_code, response_message);
-        }
-    } else {
-        spdlog::error("[Trading] Curl transmission failed: {}", curl_easy_strerror(response_code));
-    }
-
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, nullptr);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, nullptr);
-
-    return response_message;
-}
-
+    return utilities::execute_request(curl_, secret_, host_, CANCEL_ORDER_PATH, true, root_payload.dump(), token_);
 }
