@@ -20,6 +20,7 @@ add_executable(Webull-Trading-Bot
 
     src/core/application.cpp 
     src/core/curl.cpp
+    src/core/curl_pool.cpp
     src/core/market.cpp
     src/core/secret.cpp
     src/core/token.cpp

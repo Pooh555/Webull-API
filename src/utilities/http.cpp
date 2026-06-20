@@ -15,18 +15,20 @@ size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp) {
 }
 
 std::string execute_request(
-          CURL* curl, 
+          CurlPool&        pool, 
     const Secret&          secret, 
           std::string_view host, 
           std::string_view path, 
           bool             is_post, 
           std::string_view body_str,
           std::string_view token) {
+    CurlPool::CurlHandle curl_guard = pool.acquire();
+    CURL*                curl       = curl_guard.get();
+
     if (curl == nullptr) {
-        spdlog::error("[Utilities] Passed a null curl pointer to execute_request");
+        spdlog::error("[Utilities] Failed to acquire a valid CURL handle from pool");
         return "";
     }
-    
     curl_easy_setopt(curl, CURLOPT_POST, is_post ? 1L : 0L);
     curl_easy_setopt(curl, CURLOPT_HTTPGET, is_post ? 0L : 1L);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, nullptr);

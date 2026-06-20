@@ -9,17 +9,19 @@
 Application::Application() {
     spdlog::set_level(spdlog::level::debug);
 
-    curl   = std::make_unique<Curl>();
-    secret = std::make_unique<Secret>(SECRET_PATH);
-    token  = std::make_unique<Token>(TOKEN_PATH, curl->get_handle(), *secret.get(), HOST);
-    market = std::make_unique<Market>();
+    static constexpr size_t connections { 10uz };
+
+    curl_pool = std::make_unique<CurlPool>(connections);
+    secret    = std::make_unique<Secret>(SECRET_PATH);
+    token     = std::make_unique<Token>(TOKEN_PATH, *curl_pool.get(), *secret.get(), HOST);
+    market    = std::make_unique<Market>();
 }
 
 Application::~Application() {}
 
 void Application::run() {
     TradingClient client(
-        curl->get_handle(), 
+        *curl_pool, 
         *secret.get(), 
         HOST, 
         token->get_handle()

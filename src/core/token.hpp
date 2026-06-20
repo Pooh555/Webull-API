@@ -1,8 +1,7 @@
 #pragma once
 
 #include "secret.hpp"
-
-#include <curl/curl.h>
+#include "core/curl_pool.hpp" 
 
 #include <string>
 #include <string_view>
@@ -11,17 +10,24 @@ class Token {
 public:
     Token(
         const std::filesystem::path& token_path,
-              CURL*                  curl,
+              CurlPool&              pool,   
         const Secret&                secret,
         const std::string_view&      host);
     ~Token() = default;
     
+    Token(const Token&)            = delete;
+    Token& operator=(const Token&) = delete;
+
+    Token(Token&&)            noexcept = default;
+    Token& operator=(Token&&) noexcept = default;
+
     void generate(
-              CURL*             curl, 
+              CurlPool&         pool,        
         const Secret&           secret, 
         const std::string_view& host);
+
     void verify(
-              CURL*             curl, 
+              CurlPool&         pool,        
         const Secret&           secret, 
         const std::string_view& host);
 

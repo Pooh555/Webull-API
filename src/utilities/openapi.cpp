@@ -49,7 +49,7 @@ std::string generate_signature(
         sign_string += "&" + utilities::cryptography::compute_md5(request_body);
     }
 
-    char* escaped = curl_easy_escape(curl, sign_string.c_str(), static_cast<int>(sign_string.size()));
+    char*       escaped             = curl_easy_escape(curl, sign_string.c_str(), static_cast<int>(sign_string.size()));
     std::string encoded_sign_string = escaped ? escaped : "";
     
     curl_free(escaped);

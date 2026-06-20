@@ -1,8 +1,7 @@
 #pragma once
 
 #include "secret.hpp"
-
-#include <curl/curl.h>
+#include "core/curl_pool.hpp"
 
 #include <optional>
 #include <string>
@@ -28,7 +27,7 @@ struct OrderRequest {
 class TradingClient {
 public:
     TradingClient(
-              CURL* curl, 
+              CurlPool&        pool,
         const Secret&          secret, 
               std::string_view host, 
               std::string_view token);
@@ -48,10 +47,9 @@ private:
     static constexpr std::string_view MODIFY_ORDER_PATH  = "/openapi/trade/order/replace";
     static constexpr std::string_view CANCEL_ORDER_PATH  = "/openapi/trade/order/cancel";
 
-    std::string account_id = "";
-        
-          CURL*        curl_;
-    const Secret&      secret_;
-          std::string  host_;
-          std::string  token_;
+          std::string account_id = "";
+          CurlPool&   pool_;  
+    const Secret&     secret_;
+          std::string host_      = "";
+          std::string token_     = "";
 };

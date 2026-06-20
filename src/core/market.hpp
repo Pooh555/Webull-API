@@ -34,7 +34,7 @@ public:
     };
 
     std::vector<TickData> fetch_tick_data(
-              CURL*             curl, 
+              CurlPool&         pool,
         const Secret&           secret, 
         const std::string&      token, 
         const std::string&      symbol,

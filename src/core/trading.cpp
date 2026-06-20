@@ -7,12 +7,12 @@
 
 #include <format>
 
-TradingClient::TradingClient(CURL* curl, const Secret& secret, std::string_view host, std::string_view token)
-    : curl_(curl), secret_(secret), host_(host), token_(token) {}
+TradingClient::TradingClient(CurlPool& pool, const Secret& secret, std::string_view host, std::string_view token)
+    : pool_(pool), secret_(secret), host_(host), token_(token) {}
 
 std::string TradingClient::get_account_list() {
     return utilities::http::execute_request(
-        curl_, 
+        pool_,
         secret_, 
         host_, 
         ACCOUNT_LIST_PATH, 
@@ -77,7 +77,7 @@ std::string TradingClient::preview_order(const OrderRequest& request) {
         {"new_orders", nlohmann::json::array({order_item})}
     };
 
-    return utilities::http::execute_request(curl_, secret_, host_, PREVIEW_ORDER_PATH, true, root_payload.dump(), token_);
+    return utilities::http::execute_request(pool_, secret_, host_, PREVIEW_ORDER_PATH, true, root_payload.dump(), token_);
 }
 
 std::string TradingClient::place_order(const OrderRequest& request) {
@@ -103,7 +103,7 @@ std::string TradingClient::place_order(const OrderRequest& request) {
         {"new_orders", nlohmann::json::array({order_item})}
     };
 
-    return utilities::http::execute_request(curl_, secret_, host_, PLACE_ORDER_PATH, true, root_payload.dump(), token_);
+    return utilities::http::execute_request(pool_, secret_, host_, PLACE_ORDER_PATH, true, root_payload.dump(), token_);
 }
 
 std::string TradingClient::modify_order(const OrderRequest& request) {
@@ -121,7 +121,7 @@ std::string TradingClient::modify_order(const OrderRequest& request) {
         {"modify_orders", nlohmann::json::array({modify_item})}
     };
 
-    return utilities::http::execute_request(curl_, secret_, host_, MODIFY_ORDER_PATH, true, root_payload.dump(), token_);
+    return utilities::http::execute_request(pool_, secret_, host_, MODIFY_ORDER_PATH, true, root_payload.dump(), token_);
 }
 
 std::string TradingClient::cancel_order(const OrderRequest& request) {
@@ -130,5 +130,5 @@ std::string TradingClient::cancel_order(const OrderRequest& request) {
         {"client_order_id", request.client_order_id}
     };
 
-    return utilities::http::execute_request(curl_, secret_, host_, CANCEL_ORDER_PATH, true, root_payload.dump(), token_);
+    return utilities::http::execute_request(pool_, secret_, host_, CANCEL_ORDER_PATH, true, root_payload.dump(), token_);
 }
