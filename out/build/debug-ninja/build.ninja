@@ -89,6 +89,16 @@ build CMakeFiles/Webull-Trading-Bot.dir/src/core/market.cpp.o: CXX_COMPILER__Web
   OBJECT_FILE_DIR = CMakeFiles/Webull-Trading-Bot.dir/src/core
   TARGET_SUPPORT_DIR = CMakeFiles/Webull-Trading-Bot.dir
 
+build CMakeFiles/Webull-Trading-Bot.dir/src/core/secret.cpp.o: CXX_COMPILER__Webull-Trading-Bot_unscanned_Debug /home/Pooh555/programming/Webull-Trading-Bot/src/core/secret.cpp || cmake_object_order_depends_target_Webull-Trading-Bot
+  CONFIG = Debug
+  DEFINES = -DFMT_SHARED -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB
+  DEP_FILE = CMakeFiles/Webull-Trading-Bot.dir/src/core/secret.cpp.o.d
+  FLAGS = -g -std=c++23
+  INCLUDES = -I/home/Pooh555/programming/Webull-Trading-Bot/lib -I/home/Pooh555/programming/Webull-Trading-Bot/src
+  OBJECT_DIR = CMakeFiles/Webull-Trading-Bot.dir
+  OBJECT_FILE_DIR = CMakeFiles/Webull-Trading-Bot.dir/src/core
+  TARGET_SUPPORT_DIR = CMakeFiles/Webull-Trading-Bot.dir
+
 build CMakeFiles/Webull-Trading-Bot.dir/src/core/token.cpp.o: CXX_COMPILER__Webull-Trading-Bot_unscanned_Debug /home/Pooh555/programming/Webull-Trading-Bot/src/core/token.cpp || cmake_object_order_depends_target_Webull-Trading-Bot
   CONFIG = Debug
   DEFINES = -DFMT_SHARED -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB
@@ -107,16 +117,6 @@ build CMakeFiles/Webull-Trading-Bot.dir/src/core/trading.cpp.o: CXX_COMPILER__We
   INCLUDES = -I/home/Pooh555/programming/Webull-Trading-Bot/lib -I/home/Pooh555/programming/Webull-Trading-Bot/src
   OBJECT_DIR = CMakeFiles/Webull-Trading-Bot.dir
   OBJECT_FILE_DIR = CMakeFiles/Webull-Trading-Bot.dir/src/core
-  TARGET_SUPPORT_DIR = CMakeFiles/Webull-Trading-Bot.dir
-
-build CMakeFiles/Webull-Trading-Bot.dir/src/secret/secret.cpp.o: CXX_COMPILER__Webull-Trading-Bot_unscanned_Debug /home/Pooh555/programming/Webull-Trading-Bot/src/secret/secret.cpp || cmake_object_order_depends_target_Webull-Trading-Bot
-  CONFIG = Debug
-  DEFINES = -DFMT_SHARED -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB
-  DEP_FILE = CMakeFiles/Webull-Trading-Bot.dir/src/secret/secret.cpp.o.d
-  FLAGS = -g -std=c++23
-  INCLUDES = -I/home/Pooh555/programming/Webull-Trading-Bot/lib -I/home/Pooh555/programming/Webull-Trading-Bot/src
-  OBJECT_DIR = CMakeFiles/Webull-Trading-Bot.dir
-  OBJECT_FILE_DIR = CMakeFiles/Webull-Trading-Bot.dir/src/secret
   TARGET_SUPPORT_DIR = CMakeFiles/Webull-Trading-Bot.dir
 
 build CMakeFiles/Webull-Trading-Bot.dir/src/utilities/cryptography.cpp.o: CXX_COMPILER__Webull-Trading-Bot_unscanned_Debug /home/Pooh555/programming/Webull-Trading-Bot/src/utilities/cryptography.cpp || cmake_object_order_depends_target_Webull-Trading-Bot
@@ -177,7 +177,7 @@ build CMakeFiles/Webull-Trading-Bot.dir/src/utilities/time.cpp.o: CXX_COMPILER__
 #############################################
 # Link the executable /home/Pooh555/programming/Webull-Trading-Bot/bin/Webull-Trading-Bot
 
-build /home/Pooh555/programming/Webull-Trading-Bot/bin/Webull-Trading-Bot: CXX_EXECUTABLE_LINKER__Webull-Trading-Bot_Debug CMakeFiles/Webull-Trading-Bot.dir/src/main.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/core/application.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/core/curl.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/core/market.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/core/token.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/core/trading.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/secret/secret.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/utilities/cryptography.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/utilities/http.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/utilities/json.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/utilities/openapi.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/utilities/time.cpp.o | /usr/lib/libcurl.so /usr/lib/libcrypto.so /usr/lib/libspdlog.so.1.17.0 /usr/lib/libcurl.so /usr/lib/libfmt.so.12.2.0
+build /home/Pooh555/programming/Webull-Trading-Bot/bin/Webull-Trading-Bot: CXX_EXECUTABLE_LINKER__Webull-Trading-Bot_Debug CMakeFiles/Webull-Trading-Bot.dir/src/main.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/core/application.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/core/curl.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/core/market.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/core/secret.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/core/token.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/core/trading.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/utilities/cryptography.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/utilities/http.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/utilities/json.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/utilities/openapi.cpp.o CMakeFiles/Webull-Trading-Bot.dir/src/utilities/time.cpp.o | /usr/lib/libcurl.so /usr/lib/libcrypto.so /usr/lib/libspdlog.so.1.17.0 /usr/lib/libcurl.so /usr/lib/libfmt.so.12.2.0
   CONFIG = Debug
   DEP_FILE = CMakeFiles/Webull-Trading-Bot.dir/link.d
   FLAGS = -g

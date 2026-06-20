@@ -1,7 +1,7 @@
 #pragma once
 
+#include "secret.hpp"
 #include "token.hpp"
-#include "secret/secret.hpp"
 
 #include <curl/curl.h>
 

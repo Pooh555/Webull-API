@@ -25,6 +25,12 @@
 },
 {
   "directory": "/home/Pooh555/programming/Webull-Trading-Bot/out/build/debug-ninja",
+  "command": "/usr/sbin/g++ -DFMT_SHARED -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -I/home/Pooh555/programming/Webull-Trading-Bot/lib -I/home/Pooh555/programming/Webull-Trading-Bot/src -g -std=c++23 -o CMakeFiles/Webull-Trading-Bot.dir/src/core/secret.cpp.o -c /home/Pooh555/programming/Webull-Trading-Bot/src/core/secret.cpp",
+  "file": "/home/Pooh555/programming/Webull-Trading-Bot/src/core/secret.cpp",
+  "output": "/home/Pooh555/programming/Webull-Trading-Bot/out/build/debug-ninja/CMakeFiles/Webull-Trading-Bot.dir/src/core/secret.cpp.o"
+},
+{
+  "directory": "/home/Pooh555/programming/Webull-Trading-Bot/out/build/debug-ninja",
   "command": "/usr/sbin/g++ -DFMT_SHARED -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -I/home/Pooh555/programming/Webull-Trading-Bot/lib -I/home/Pooh555/programming/Webull-Trading-Bot/src -g -std=c++23 -o CMakeFiles/Webull-Trading-Bot.dir/src/core/token.cpp.o -c /home/Pooh555/programming/Webull-Trading-Bot/src/core/token.cpp",
   "file": "/home/Pooh555/programming/Webull-Trading-Bot/src/core/token.cpp",
   "output": "/home/Pooh555/programming/Webull-Trading-Bot/out/build/debug-ninja/CMakeFiles/Webull-Trading-Bot.dir/src/core/token.cpp.o"
@@ -34,12 +40,6 @@
   "command": "/usr/sbin/g++ -DFMT_SHARED -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -I/home/Pooh555/programming/Webull-Trading-Bot/lib -I/home/Pooh555/programming/Webull-Trading-Bot/src -g -std=c++23 -o CMakeFiles/Webull-Trading-Bot.dir/src/core/trading.cpp.o -c /home/Pooh555/programming/Webull-Trading-Bot/src/core/trading.cpp",
   "file": "/home/Pooh555/programming/Webull-Trading-Bot/src/core/trading.cpp",
   "output": "/home/Pooh555/programming/Webull-Trading-Bot/out/build/debug-ninja/CMakeFiles/Webull-Trading-Bot.dir/src/core/trading.cpp.o"
-},
-{
-  "directory": "/home/Pooh555/programming/Webull-Trading-Bot/out/build/debug-ninja",
-  "command": "/usr/sbin/g++ -DFMT_SHARED -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -I/home/Pooh555/programming/Webull-Trading-Bot/lib -I/home/Pooh555/programming/Webull-Trading-Bot/src -g -std=c++23 -o CMakeFiles/Webull-Trading-Bot.dir/src/secret/secret.cpp.o -c /home/Pooh555/programming/Webull-Trading-Bot/src/secret/secret.cpp",
-  "file": "/home/Pooh555/programming/Webull-Trading-Bot/src/secret/secret.cpp",
-  "output": "/home/Pooh555/programming/Webull-Trading-Bot/out/build/debug-ninja/CMakeFiles/Webull-Trading-Bot.dir/src/secret/secret.cpp.o"
 },
 {
   "directory": "/home/Pooh555/programming/Webull-Trading-Bot/out/build/debug-ninja",

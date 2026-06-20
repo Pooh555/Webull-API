@@ -1,6 +1,6 @@
 #pragma once
 
-#include "secret/secret.hpp"
+#include "secret.hpp"
 
 #include <curl/curl.h>
 

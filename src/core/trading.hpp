@@ -1,6 +1,6 @@
 #pragma once
 
-#include "secret/secret.hpp"
+#include "secret.hpp"
 
 #include <curl/curl.h>
 
@@ -34,12 +34,13 @@ public:
               std::string_view token);
     ~TradingClient() = default;
 
-    std::string get_account_list();
     std::string preview_order(const OrderRequest& request);
     std::string place_order(const OrderRequest& request);
     std::string modify_order(const OrderRequest& request);
     std::string cancel_order(const OrderRequest& request);
 
+    [[nodiscard]] std::string get_account_id();
+    [[nodiscard]] std::string get_account_list();
 private:
     static constexpr std::string_view ACCOUNT_LIST_PATH  = "/openapi/account/list";
     static constexpr std::string_view PREVIEW_ORDER_PATH = "/openapi/trade/order/preview";
@@ -47,6 +48,8 @@ private:
     static constexpr std::string_view MODIFY_ORDER_PATH  = "/openapi/trade/order/replace";
     static constexpr std::string_view CANCEL_ORDER_PATH  = "/openapi/trade/order/cancel";
 
+    std::string account_id = "";
+        
           CURL*        curl_;
     const Secret&      secret_;
           std::string  host_;

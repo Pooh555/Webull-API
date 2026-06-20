@@ -2,8 +2,8 @@
 
 #include "curl.hpp"
 #include "market.hpp"
+#include "secret.hpp"
 #include "token.hpp"
-#include "secret/secret.hpp"
 
 #include <memory>
 

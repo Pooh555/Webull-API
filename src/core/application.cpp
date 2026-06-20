@@ -25,34 +25,10 @@ void Application::run() {
         token->get_handle()
     );
 
-    spdlog::info("[Application] Querying dynamic user account targets...");
-    std::string account_list_json = client.get_account_list();
-    std::string extracted_account_id = "";
+    const std::string extracted_account_id = client.get_account_id();
 
-    try {
-        if (!account_list_json.empty()) {
-            auto parsed_response = nlohmann::json::parse(account_list_json);
-            
-            if (parsed_response.is_array() && !parsed_response.empty()) {
-                extracted_account_id = parsed_response[0].value("account_id", "");
-            } else if (parsed_response.contains("data") && parsed_response["data"].is_array() && !parsed_response["data"].empty()) {
-                extracted_account_id = parsed_response["data"][0].value("account_id", "");
-            }
-        }
-    } catch (const nlohmann::json::parse_error& e) {
-        spdlog::error("[Application] Failed to parse account listing JSON metrics: {}", e.what());
-        return;
-    }
-
-    if (extracted_account_id.empty()) {
-        spdlog::error("[Application] Could not determine a valid account ID target mapping. Aborting request pipeline.");
-        return;
-    }
-
-    spdlog::info("[Application] Target localized: {}. Executing order placement for SSG...", extracted_account_id);
     std::string client_order_id = utilities::cryptography::generate_nonce(26uz);
-
-    std::string place_json = client.place_order({
+    std::string place_json      = client.place_order({
         .account_id              = extracted_account_id,          
         .combo_type              = "NORMAL",                      
         .client_order_id         = client_order_id,               
@@ -70,11 +46,12 @@ void Application::run() {
     });
 
     if (place_json.empty()) {
-        spdlog::error("[Application] Order placement failed. Aborting demo workflow sequence.");
+        spdlog::error("[Application] Order placement failed. Aborting demo workflow sequence");
         return;
     }
 
     spdlog::info("[Application] Modifying placed order reference: {}", client_order_id);
+
     std::string modify_json = client.modify_order({
         .account_id      = extracted_account_id,
         .client_order_id = client_order_id,
@@ -85,11 +62,12 @@ void Application::run() {
     });
 
     if (modify_json.empty()) {
-        spdlog::error("[Application] Order modification failed. Aborting demo workflow sequence.");
+        spdlog::error("[Application] Order modification failed. Aborting demo workflow sequence");
         return;
     }
 
     spdlog::info("[Application] Cancelling order reference: {}", client_order_id);
+
     std::string cancel_json = client.cancel_order({
         .account_id      = extracted_account_id,
         .client_order_id = client_order_id,
