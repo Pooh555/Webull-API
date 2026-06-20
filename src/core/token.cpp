@@ -14,6 +14,7 @@ Token::Token(
     const Secret&                secret,
     const std::string_view&      host) {
     nlohmann::json json_data = utilities::json::read(token_path);
+
     try {
         token = json_data.value("token", "");
     } catch (const std::exception& e) {
@@ -22,7 +23,10 @@ Token::Token(
 
     verify(pool, secret, host);
 
-    if (!is_valid() || get_status() != "NORMAL") {
+    if (is_valid() && get_status() == "NORMAL") {
+        spdlog::info("[Token] Successfully activated token");
+        return;
+    } else {
         spdlog::info("[Token] The current token is invalid. Generating new token...");
 
         generate(pool, secret, host); 
@@ -50,7 +54,12 @@ Token::Token(
 }
 
 void Token::generate(CurlPool& pool, const Secret& secret, const std::string_view& host) {
-    std::string response_message = utilities::http::execute_request(pool, secret, host, CREATE_PATH, true);
+    std::string response_message = utilities::http::execute_request(
+        pool, 
+        secret, 
+        host, 
+        CREATE_PATH, 
+        utilities::http::HttpMethod::POST).message;
     
     if (!response_message.empty()) {
         try {
@@ -80,7 +89,13 @@ void Token::verify(CurlPool& pool, const Secret& secret, const std::string_view&
     json_payload["token"] = this->token; 
 
     std::string request_body     = json_payload.dump();
-    std::string response_message = utilities::http::execute_request(pool, secret, host, VERIFY_PATH, true, request_body);
+    std::string response_message = utilities::http::execute_request(
+        pool, 
+        secret, 
+        host, 
+        VERIFY_PATH, 
+        utilities::http::HttpMethod::POST, 
+        request_body).message;
 
     if (!response_message.empty()) {
         try {

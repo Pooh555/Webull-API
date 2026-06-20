@@ -5,22 +5,32 @@
 
 #include <string>
 #include <string_view>
+#include <utility>
 
 namespace utilities::http {
 
+enum class HttpMethod : bool {
+    GET  = false,
+    POST = true
+};
+
+struct Response {
+    long        http_code { 0L };  
+    std::string message   { "" };
+};
+
 size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp);
 
-[[nodiscard]] std::string execute_request(
+[[nodiscard]] Response execute_request(
           CurlPool&        pool, 
     const Secret&          secret, 
           std::string_view host, 
           std::string_view path, 
-          bool             is_post, 
+          HttpMethod       method,
           std::string_view body_str = "",
           std::string_view token    = "");
           
-curl_slist* generate_headers(
-          curl_slist*      raw_headers,
+[[nodiscard]] curl_slist* generate_headers(
     const Secret&          secret,
           std::string_view timestamp,
           std::string_view nonce,

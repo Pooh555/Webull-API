@@ -1,7 +1,5 @@
 #include "trading.hpp"
 
-#include "utilities/http.hpp"
-
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 
@@ -10,13 +8,13 @@
 TradingClient::TradingClient(CurlPool& pool, const Secret& secret, std::string_view host, std::string_view token)
     : pool_(pool), secret_(secret), host_(host), token_(token) {}
 
-std::string TradingClient::get_account_list() {
+utilities::http::Response TradingClient::fetch_account_list() {
     return utilities::http::execute_request(
         pool_,
         secret_, 
         host_, 
         ACCOUNT_LIST_PATH, 
-        false, 
+        utilities::http::HttpMethod::GET, 
         "", 
         token_
     );
@@ -25,7 +23,7 @@ std::string TradingClient::get_account_list() {
 std::string TradingClient::get_account_id() {
     if (!account_id.empty()) return account_id;
 
-    std::string account_list_json    = get_account_list();
+    std::string account_list_json    = fetch_account_list().message;
     std::string extracted_account_id = "";
 
     try {
@@ -54,7 +52,53 @@ std::string TradingClient::get_account_id() {
     return account_id;
 }
 
-std::string TradingClient::preview_order(const OrderRequest& request) {
+utilities::http::Response TradingClient::fetch_account_balance(const std::string& account_id) {
+    if (account_id.empty()) {
+        spdlog::error("[TradingClient] Failed to fetch account balance: account_id is empty");
+        return { 0L, R"({"error": "Empty account ID"})" };
+    }
+
+    std::string path = std::format(
+        "{}?account_id={}",
+        ACCOUNT_BALANCE_PATH,
+        account_id
+    );
+
+    return utilities::http::execute_request(
+        pool_,
+        secret_,
+        host_,
+        path,
+        utilities::http::HttpMethod::GET,
+        "",
+        token_
+    );
+}
+    
+utilities::http::Response TradingClient::fetch_account_position(const std::string& account_id) {
+    if (account_id.empty()) {
+        spdlog::error("[TradingClient] Failed to fetch account positions: account_id is empty");
+        return { 0L, R"({"error": "Empty account ID"})" };
+    }
+
+    std::string path = std::format(
+        "{}?account_id={}",
+        ACCOUNT_POSITION_PATH,
+        account_id
+    );
+
+    return utilities::http::execute_request(
+        pool_,
+        secret_,
+        host_,
+        path,
+        utilities::http::HttpMethod::GET,
+        "",
+        token_
+    );
+}
+
+utilities::http::Response TradingClient::preview_order(const OrderRequest& request) {
     nlohmann::json order_item {
         {"combo_type",              request.combo_type},
         {"client_order_id",         request.client_order_id},
@@ -77,10 +121,17 @@ std::string TradingClient::preview_order(const OrderRequest& request) {
         {"new_orders", nlohmann::json::array({order_item})}
     };
 
-    return utilities::http::execute_request(pool_, secret_, host_, PREVIEW_ORDER_PATH, true, root_payload.dump(), token_);
+    return utilities::http::execute_request(
+        pool_, 
+        secret_, 
+        host_, 
+        PREVIEW_ORDER_PATH, 
+        utilities::http::HttpMethod::POST, 
+        root_payload.dump(), 
+        token_);
 }
 
-std::string TradingClient::place_order(const OrderRequest& request) {
+utilities::http::Response TradingClient::place_order(const OrderRequest& request) {
     nlohmann::json order_item {
         {"combo_type",              request.combo_type},
         {"client_order_id",         request.client_order_id},
@@ -103,10 +154,17 @@ std::string TradingClient::place_order(const OrderRequest& request) {
         {"new_orders", nlohmann::json::array({order_item})}
     };
 
-    return utilities::http::execute_request(pool_, secret_, host_, PLACE_ORDER_PATH, true, root_payload.dump(), token_);
+    return utilities::http::execute_request(
+        pool_, 
+        secret_, 
+        host_, 
+        PLACE_ORDER_PATH, 
+        utilities::http::HttpMethod::POST, 
+        root_payload.dump(), 
+        token_);
 }
 
-std::string TradingClient::modify_order(const OrderRequest& request) {
+utilities::http::Response TradingClient::modify_order(const OrderRequest& request) {
     nlohmann::json modify_item {
         {"client_order_id", request.client_order_id}
     };
@@ -121,14 +179,28 @@ std::string TradingClient::modify_order(const OrderRequest& request) {
         {"modify_orders", nlohmann::json::array({modify_item})}
     };
 
-    return utilities::http::execute_request(pool_, secret_, host_, MODIFY_ORDER_PATH, true, root_payload.dump(), token_);
+    return utilities::http::execute_request(
+        pool_, 
+        secret_, 
+        host_, 
+        MODIFY_ORDER_PATH, 
+        utilities::http::HttpMethod::POST, 
+        root_payload.dump(), 
+        token_);
 }
 
-std::string TradingClient::cancel_order(const OrderRequest& request) {
+utilities::http::Response TradingClient::cancel_order(const OrderRequest& request) {
     nlohmann::json root_payload {
         {"account_id", request.account_id},
         {"client_order_id", request.client_order_id}
     };
 
-    return utilities::http::execute_request(pool_, secret_, host_, CANCEL_ORDER_PATH, true, root_payload.dump(), token_);
+    return utilities::http::execute_request(
+        pool_, 
+        secret_,
+        host_, 
+        CANCEL_ORDER_PATH, 
+        utilities::http::HttpMethod::POST, 
+        root_payload.dump(), 
+        token_);
 }
