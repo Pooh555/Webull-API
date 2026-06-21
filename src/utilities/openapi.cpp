@@ -17,7 +17,6 @@ std::string generate_signature(
           std::string_view                                  request_path,
     const std::vector<std::pair<std::string, std::string>>& query_params,
           std::string_view                                  request_body) {
-    
     std::vector<std::pair<std::string, std::string>> parameters {
         {"host", std::string(host)},
         {"x-app-key", std::string(app_key)},

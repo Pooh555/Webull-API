@@ -9,20 +9,20 @@
 #include <string_view>
 
 struct OrderRequest {
-    std::string           account_id              = "";            
-    std::string           combo_type              = "";  
-    std::string           client_order_id         = "";  
-    std::string           instrument_type         = "";  
-    std::string           market                  = "";  
-    std::string           symbol                  = "";  
-    std::string           order_type              = "";  
-    std::string           entrust_type            = "";  
-    std::string           support_trading_session = "";  
-    std::string           time_in_force           = "";  
-    std::string           side                    = "";  
-    std::optional<double> quantity                = std::nullopt;  
-    std::optional<double> limit_price             = std::nullopt;  
-    std::optional<double> stop_price              = std::nullopt;  
+    std::string           account_id              { "" };            
+    std::string           combo_type              { "" }; 
+    std::string           client_order_id         { "" }; 
+    std::string           instrument_type         { "" }; 
+    std::string           market                  { "" }; 
+    std::string           symbol                  { "" }; 
+    std::string           order_type              { "" }; 
+    std::string           entrust_type            { "" }; 
+    std::string           support_trading_session { "" }; 
+    std::string           time_in_force           { "" }; 
+    std::string           side                    { "" }; 
+    std::optional<double> quantity                { std::nullopt };  
+    std::optional<double> limit_price             { std::nullopt };   
+    std::optional<double> stop_price              { std::nullopt };  
 };
 
 class TradingClient {
@@ -54,18 +54,17 @@ public:
     [[nodiscard]] std::future<utilities::http::Response> fetch_account_balance_async(const std::string& account_id);
     [[nodiscard]] std::future<utilities::http::Response> fetch_account_position_async(const std::string& account_id);
 private:
-private:
-    static constexpr std::string_view ACCOUNT_LIST_PATH     = "/openapi/account/list";
-    static constexpr std::string_view ACCOUNT_BALANCE_PATH  = "/openapi/assets/balance";
-    static constexpr std::string_view ACCOUNT_POSITION_PATH = "/openapi/assets/positions";
-    static constexpr std::string_view PREVIEW_ORDER_PATH    = "/openapi/trade/order/preview";
-    static constexpr std::string_view PLACE_ORDER_PATH      = "/openapi/trade/order/place";
-    static constexpr std::string_view MODIFY_ORDER_PATH     = "/openapi/trade/order/replace";
-    static constexpr std::string_view CANCEL_ORDER_PATH     = "/openapi/trade/order/cancel";
+    static constexpr std::string_view ACCOUNT_LIST_PATH     { "/openapi/account/list" };
+    static constexpr std::string_view ACCOUNT_BALANCE_PATH  { "/openapi/assets/balance" };
+    static constexpr std::string_view ACCOUNT_POSITION_PATH { "/openapi/assets/positions" };
+    static constexpr std::string_view PREVIEW_ORDER_PATH    { "/openapi/trade/order/preview" };
+    static constexpr std::string_view PLACE_ORDER_PATH      { "/openapi/trade/order/place" };
+    static constexpr std::string_view MODIFY_ORDER_PATH     { "/openapi/trade/order/replace" };
+    static constexpr std::string_view CANCEL_ORDER_PATH     { "/openapi/trade/order/cancel" };
 
-          std::string account_id = "";
+          std::string account_id { "" };
           CurlPool&   pool_;  
     const Secret&     secret_;
-          std::string host_      = "";
-          std::string token_     = "";
+          std::string host_      { "" };
+          std::string token_     { "" };
 };

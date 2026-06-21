@@ -35,9 +35,9 @@ public:
     [[nodiscard]] std::string get_status() const { return status; }
     [[nodiscard]] bool        is_valid()   const { return !token.empty(); }
 private:
-    static constexpr std::string_view CREATE_PATH = "/openapi/auth/token/create";
-    static constexpr std::string_view VERIFY_PATH = "/openapi/auth/token/check";
+    static constexpr std::string_view CREATE_PATH { "/openapi/auth/token/create" };
+    static constexpr std::string_view VERIFY_PATH { "/openapi/auth/token/check" };
 
-    std::string token  = "";
-    std::string status = "";
+    std::string token  { "" };
+    std::string status { "" };
 };

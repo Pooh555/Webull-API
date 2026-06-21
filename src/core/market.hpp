@@ -1,47 +1,58 @@
 #pragma once
 
+#include "curl_pool.hpp"
 #include "secret.hpp"
 #include "token.hpp"
+#include "utilities/http.hpp"
 
-#include <curl/curl.h>
-
+#include <future>
 #include <string>
 #include <string_view>
 #include <vector>
 
-class Market {
+struct MarketRequest {
+    std::string           symbol          { "" };
+    std::string           category        { "" };
+    std::optional<size_t> count           { 0uz };
+    std::string           trading_session { "" };
+};
+
+struct TickData {
+    std::string symbol          { "" };
+    std::string instrument_id   { "" };
+    // std::string price           { "" };
+    // std::string open            { "" };
+    // std::string high            { "" };
+    // std::string low             { "" };
+    std::string volume          { "" };
+    std::string side            { "" };
+    // std::string change          { "" };
+    // std::string change_ratio    { "" };
+    // std::string pre_close       { "" };
+    // std::string last_trade_time { "" };
+    std::string trading_session { "" };
+};
+
+class MarketClient {
 public:
-    Market()  = default;
-    ~Market() = default;
+    MarketClient(
+              CurlPool&        pool,
+        const Secret&          secret, 
+              std::string_view host, 
+              std::string_view token);
+    ~MarketClient() = default;
 
-    Market(const Market&)            = delete;
-    Market& operator=(const Market&) = delete;
+    MarketClient(const MarketClient&)            = delete;
+    MarketClient& operator=(const MarketClient&) = delete;
 
-    struct TickData {
-        std::string symbol          = "";
-        std::string instrument_id   = "";
-        // std::string price           = "";
-        // std::string open            = "";
-        // std::string high            = "";
-        // std::string low             = "";
-        std::string volume          = "";
-        std::string side            = "";
-        // std::string change          = "";
-        // std::string change_ratio    = "";
-        // std::string pre_close       = "";
-        // std::string last_trade_time = "";
-        std::string trading_session = "";
-    };
+    [[nodiscard]] utilities::http::Response fetch_tick_data(const MarketRequest& request);
 
-    std::vector<TickData> fetch_tick_data(
-              CurlPool&         pool,
-        const Secret&           secret, 
-        const std::string&      token, 
-        const std::string&      symbol,
-        const std::string&      category,
-        const std::string&      count,
-        const std::string&      session,
-        const std::string_view& host);
+    [[nodiscard]] std::future<utilities::http::Response> fetch_tick_data_async(const MarketRequest& request);
 private:
     static constexpr std::string_view TICK_PATH = "/openapi/market-data/stock/tick";
+
+          CurlPool&   pool_;  
+    const Secret&     secret_;
+          std::string host_      { "" };
+          std::string token_     { "" };
 };

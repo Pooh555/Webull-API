@@ -15,7 +15,7 @@ public:
     [[nodiscard]] const std::string& get_key()    const { return key; }
     [[nodiscard]] const std::string& get_secret() const { return secret; }
 private:
-    std::string id     = "";
-    std::string key    = "";
-    std::string secret = "";
+    std::string id     { "" };
+    std::string key    { "" };
+    std::string secret { "" };
 };

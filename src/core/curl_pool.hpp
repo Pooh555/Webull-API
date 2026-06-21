@@ -27,5 +27,5 @@ private:
     std::queue<CURL*>       handles_;
     std::mutex              mutex_;
     std::condition_variable condition_;
-    bool                    shutdown_ = false;
+    bool                    shutdown_  { false };
 };

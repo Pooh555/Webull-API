@@ -17,10 +17,13 @@ Application::Application() {
     curl_pool = std::make_unique<CurlPool>(connections);
     secret    = std::make_unique<Secret>(SECRET_PATH);
     token     = std::make_unique<Token>(TOKEN_PATH, *curl_pool.get(), *secret.get(), HOST);
-    market    = std::make_unique<Market>();
 }
 
 void Application::run() {
+    demo();
+}
+
+void Application::demo() {
     TradingClient client(
         *curl_pool, 
         *secret.get(), 
@@ -79,10 +82,8 @@ void Application::run() {
         spdlog::info("[Application] Successfully placed order:\n {}", nlohmann::json::parse(place_order.message).dump(4));
     } else {
         spdlog::error("[Application] Failed to place order:\n {}", nlohmann::json::parse(place_order.message).dump(4));
-        return; 
     }
 
-    // Modify Order
     spdlog::info("[Application] Modifying placed order reference: {}", client_order_id);
     
     std::future<utilities::http::Response> modify_order_future = client.modify_order_async({
@@ -95,6 +96,7 @@ void Application::run() {
     });
 
     utilities::http::Response modify_order = modify_order_future.get();
+
     if (modify_order.http_code == 200L) {
         spdlog::info("[Application] Successfully modified order:\n {}", nlohmann::json::parse(modify_order.message).dump(4));
     } else {
@@ -114,5 +116,29 @@ void Application::run() {
         spdlog::info("[Application] Successfully canceled order:\n {}", nlohmann::json::parse(cancel_order.message).dump(4));
     } else {
         spdlog::error("[Application] Failed to cancel order:\n {}", nlohmann::json::parse(cancel_order.message).dump(4));
+    }
+
+    MarketClient market_client(
+        *curl_pool,
+        *secret,
+        HOST,
+        token->get_handle()
+    );
+
+    spdlog::info("[Application] Fetching tick data (asynchronous)...");
+
+    std::future<utilities::http::Response> tick_future = market_client.fetch_tick_data_async({ 
+        .symbol          = "AAPL",
+        .category        = "US_STOCK",
+        .count           = 20uz,
+        .trading_session = "PRE"
+    });
+
+    utilities::http::Response async_tick_response = tick_future.get();
+
+    if (async_tick_response.http_code == 200L) {
+        spdlog::info("[Application] Successfully fetched async tick data:\n{}", nlohmann::json::parse(async_tick_response.message).dump(4));
+    } else {
+        spdlog::error("[Application] Failed to fetch async tick data:\n{}", nlohmann::json::parse(async_tick_response.message).dump(4));
     }
 }
