@@ -161,6 +161,40 @@ utilities::http::Response execute_request(
     return { http_code, std::move(response_message) };
 }
 
+std::future<Response> execute_request_async(
+          CurlPool&        pool,
+    const Secret&          secret,
+          std::string_view host,
+          std::string_view path,
+          HttpMethod       method,
+          std::string      body_str, 
+          std::string      token) {
+    std::string host_str{ host };
+    std::string path_str{ path };
+
+    return std::async(std::launch::async, 
+        [
+            &pool, 
+            secret, 
+            host_str = std::move(host_str), 
+            path_str = std::move(path_str), 
+            method, 
+            body_str = std::move(body_str), 
+            token = std::move(token)
+        ]() -> Response {
+            return execute_request(
+                pool, 
+                secret, 
+                host_str, 
+                path_str, 
+                method, 
+                body_str, 
+                token
+            );
+        }
+    );
+}
+
 curl_slist* generate_headers(
     const Secret&          secret,
           std::string_view timestamp,

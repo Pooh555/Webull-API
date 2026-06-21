@@ -4,7 +4,7 @@ cmake_policy(SET CMP0072 NEW)
 project(Webull-Trading-Bot VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -18,8 +18,7 @@ find_package(spdlog REQUIRED)
 add_executable(Webull-Trading-Bot 
     src/main.cpp
 
-    src/core/application.cpp 
-    src/core/curl.cpp
+    src/core/application.cpp
     src/core/curl_pool.cpp
     src/core/market.cpp
     src/core/secret.cpp

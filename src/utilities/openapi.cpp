@@ -3,6 +3,7 @@
 #include "cryptography.hpp"
 
 #include <algorithm>
+#include <ranges> 
 
 namespace utilities::openapi {
     
@@ -28,9 +29,7 @@ std::string generate_signature(
 
     parameters.insert(parameters.end(), query_params.begin(), query_params.end());
 
-    std::sort(parameters.begin(), parameters.end(), [](const auto& lhs, const auto& rhs) {
-        return lhs.first < rhs.first;
-    });
+    std::ranges::sort(parameters, {}, &std::pair<std::string, std::string>::first);
 
     std::string canonical       = "";
     size_t      parameters_size = parameters.size();
@@ -49,7 +48,7 @@ std::string generate_signature(
         sign_string += "&" + utilities::cryptography::compute_md5(request_body);
     }
 
-    char*       escaped             = curl_easy_escape(curl, sign_string.c_str(), static_cast<int>(sign_string.size()));
+    char* escaped             = curl_easy_escape(curl, sign_string.c_str(), static_cast<int>(sign_string.size()));
     std::string encoded_sign_string = escaped ? escaped : "";
     
     curl_free(escaped);

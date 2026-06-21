@@ -8,8 +8,8 @@ public:
     Secret(const std::filesystem::path& secret_path);
     ~Secret() = default;
 
-    Secret(const Secret&)            = delete;
-    Secret& operator=(const Secret&) = delete;
+    Secret(const Secret&)            = default;
+    Secret& operator=(const Secret&) = default;
     
     [[nodiscard]] const std::string& get_id()     const { return id; }
     [[nodiscard]] const std::string& get_key()    const { return key; }

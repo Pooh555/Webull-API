@@ -5,6 +5,8 @@
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
+#include <stdexcept>
+
 Secret::Secret(const std::filesystem::path& secret_path) {
     nlohmann::json json_data = utilities::json::read(secret_path);
 
@@ -14,5 +16,6 @@ Secret::Secret(const std::filesystem::path& secret_path) {
         secret = json_data.value("secret", ""); 
     } catch (const std::exception& e) {
         spdlog::critical("[Secret] Failed map JSON fields to internal registry: {}", e.what());
+        throw std::runtime_error("[Secret] Failed to initialize secret");
     }
 }

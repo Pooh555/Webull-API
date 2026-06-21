@@ -76,14 +76,16 @@ std::string compute_md5(std::string_view data) {
 }
 
 std::string generate_nonce(size_t length) {
-    static constexpr std::string_view     digits = "0123456789";
+    static constexpr std::string_view digits = "0123456789";
     
-    std::random_device                    rd;
-    std::mt19937_64                       gen(rd());
+    thread_local static std::mt19937_64 gen([]() {
+        std::random_device rd;
+        return std::mt19937_64(rd());
+    }());
+    
     std::uniform_int_distribution<size_t> dist(0, digits.size() - 1);
 
     std::string nonce = "";
-
     nonce.reserve(length);
 
     for (size_t i { 0uz }; i < length; ++i) {

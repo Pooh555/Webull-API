@@ -6,6 +6,7 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <future>  
 
 namespace utilities::http {
 
@@ -29,7 +30,14 @@ size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp);
           HttpMethod       method,
           std::string_view body_str = "",
           std::string_view token    = "");
-          
+[[nodiscard]] std::future<Response> execute_request_async(
+          CurlPool&        pool, 
+    const Secret&          secret, 
+          std::string_view host, 
+          std::string_view path, 
+          HttpMethod       method,
+          std::string      body_str = "",
+          std::string      token    = "");
 [[nodiscard]] curl_slist* generate_headers(
     const Secret&          secret,
           std::string_view timestamp,

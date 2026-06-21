@@ -5,8 +5,9 @@
 
 #include <spdlog/spdlog.h>
 
-#include <thread>
 #include <chrono>
+#include <exception>
+#include <thread>
 
 Token::Token(
     const std::filesystem::path& token_path,
@@ -40,8 +41,8 @@ Token::Token(
     }
 
     if (get_status() != "NORMAL") {
-        spdlog::error("[Token] Token failed to activate. Status returned: {}", get_status());
-        return;
+        spdlog::critical("[Token] Token failed to activate. Status returned: {}", get_status());
+        throw std::runtime_error("[Token] Failed to activate token");
     }   
 
     spdlog::debug("[Token] Saving newly activated token to disk...");

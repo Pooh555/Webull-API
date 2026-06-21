@@ -39,10 +39,21 @@ public:
     utilities::http::Response modify_order(const OrderRequest& request);
     utilities::http::Response cancel_order(const OrderRequest& request);
 
+    std::future<utilities::http::Response> preview_order_async(const OrderRequest& request);
+    std::future<utilities::http::Response> place_order_async(const OrderRequest& request);
+    std::future<utilities::http::Response> modify_order_async(const OrderRequest& request);
+    std::future<utilities::http::Response> cancel_order_async(const OrderRequest& request);
+
     [[nodiscard]] std::string               get_account_id();
     [[nodiscard]] utilities::http::Response fetch_account_list();
     [[nodiscard]] utilities::http::Response fetch_account_balance(const std::string& account_id);
     [[nodiscard]] utilities::http::Response fetch_account_position(const std::string& account_id);
+
+    [[nodiscard]] std::string                            get_account_id_async();
+    [[nodiscard]] std::future<utilities::http::Response> fetch_account_list_async();
+    [[nodiscard]] std::future<utilities::http::Response> fetch_account_balance_async(const std::string& account_id);
+    [[nodiscard]] std::future<utilities::http::Response> fetch_account_position_async(const std::string& account_id);
+private:
 private:
     static constexpr std::string_view ACCOUNT_LIST_PATH     = "/openapi/account/list";
     static constexpr std::string_view ACCOUNT_BALANCE_PATH  = "/openapi/assets/balance";
