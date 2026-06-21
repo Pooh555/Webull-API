@@ -14,9 +14,9 @@ Application::Application() {
 
     static constexpr size_t connections { 10uz };
 
-    curl_pool = std::make_unique<CurlPool>(connections);
-    secret    = std::make_unique<Secret>(SECRET_PATH);
-    token     = std::make_unique<Token>(TOKEN_PATH, *curl_pool.get(), *secret.get(), HOST);
+    curl_pool = std::make_unique<wdk::core::CurlPool>(connections);
+    secret    = std::make_unique<wdk::core::Secret>(SECRET_PATH);
+    token     = std::make_unique<wdk::core::Token>(TOKEN_PATH, *curl_pool.get(), *secret.get(), HOST);
 }
 
 void Application::run() {
@@ -24,7 +24,7 @@ void Application::run() {
 }
 
 void Application::demo() {
-    TradingClient client(
+    wdk::client::TradingClient client(
         *curl_pool, 
         *secret.get(), 
         HOST, 
@@ -118,7 +118,7 @@ void Application::demo() {
         spdlog::error("[Application] Failed to cancel order:\n {}", nlohmann::json::parse(cancel_order.message).dump(4));
     }
 
-    MarketClient market_client(
+    wdk::client::MarketClient market_client(
         *curl_pool,
         *secret,
         HOST,

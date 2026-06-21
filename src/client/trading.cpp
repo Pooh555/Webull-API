@@ -6,7 +6,13 @@
 #include <format>
 #include <future> 
 
-TradingClient::TradingClient(CurlPool& pool, const Secret& secret, std::string_view host, std::string_view token)
+namespace wdk::client {
+
+TradingClient::TradingClient(
+          wdk::core::CurlPool& pool, 
+    const wdk::core::Secret&   secret, 
+          std::string_view     host, 
+          std::string_view     token)
     : pool_(pool), secret_(secret), host_(host), token_(token) {}
 
 wdk::utilities::Response TradingClient::fetch_account_list() {
@@ -403,4 +409,6 @@ std::future<wdk::utilities::Response> TradingClient::cancel_order_async(const Or
         root_payload.dump(), 
         token_
     );
+}
+
 }

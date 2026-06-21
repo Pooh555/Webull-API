@@ -8,6 +8,8 @@
 #include <mutex>
 #include <queue>
 
+namespace wdk::core {
+
 class CurlPool {
 public:
     using CurlReleaser = std::function<void(CURL*)>;
@@ -29,3 +31,5 @@ private:
     std::condition_variable condition_;
     bool                    shutdown_  { false };
 };
+
+}

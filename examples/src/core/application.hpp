@@ -25,9 +25,9 @@ private:
     static constexpr std::string_view TOKEN_PATH  { "/home/Pooh555/programming/Webull-SDK/examples/res/token.json" };
     static constexpr std::string_view SECRET_PATH { "/home/Pooh555/programming/Webull-SDK/examples/res/secret.json" };
 
-    std::unique_ptr<CurlPool>     curl_pool;
-    std::unique_ptr<Secret>       secret;
-    std::unique_ptr<Token>        token;
+    std::unique_ptr<wdk::core::CurlPool> curl_pool;
+    std::unique_ptr<wdk::core::Secret>   secret;
+    std::unique_ptr<wdk::core::Token>    token;
 
     void demo();
 };

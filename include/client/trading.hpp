@@ -8,6 +8,8 @@
 #include <string>
 #include <string_view>
 
+namespace wdk::client {
+
 struct OrderRequest {
     std::string           account_id              { "" };            
     std::string           combo_type              { "" }; 
@@ -28,10 +30,10 @@ struct OrderRequest {
 class TradingClient {
 public:
     TradingClient(
-              CurlPool&        pool,
-        const Secret&          secret, 
-              std::string_view host, 
-              std::string_view token);
+              wdk::core::CurlPool& pool,
+        const wdk::core::Secret&   secret, 
+              std::string_view     host, 
+              std::string_view     token);
     ~TradingClient() = default;
 
     wdk::utilities::Response preview_order(const OrderRequest& request);
@@ -62,9 +64,11 @@ private:
     static constexpr std::string_view MODIFY_ORDER_PATH     { "/openapi/trade/order/replace" };
     static constexpr std::string_view CANCEL_ORDER_PATH     { "/openapi/trade/order/cancel" };
 
-          std::string account_id { "" };
-          CurlPool&   pool_;  
-    const Secret&     secret_;
-          std::string host_      { "" };
-          std::string token_     { "" };
+          std::string          account_id { "" };
+          wdk::core::CurlPool& pool_;  
+    const wdk::core::Secret&   secret_;
+          std::string          host_      { "" };
+          std::string          token_     { "" };
 };
+
+}

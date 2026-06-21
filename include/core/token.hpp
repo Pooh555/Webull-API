@@ -6,6 +6,8 @@
 #include <string>
 #include <string_view>
 
+namespace wdk::core {
+
 class Token {
 public:
     Token(
@@ -41,3 +43,5 @@ private:
     std::string token  { "" };
     std::string status { "" };
 };
+
+}

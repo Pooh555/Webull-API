@@ -9,6 +9,8 @@
 #include <exception>
 #include <thread>
 
+namespace wdk::core {
+
 Token::Token(
     const std::filesystem::path& token_path,
           CurlPool&              pool,       
@@ -109,4 +111,6 @@ void Token::verify(CurlPool& pool, const Secret& secret, const std::string_view&
             spdlog::warn("[Token] Failed to parse JSON verification response: {}", e.what());
         }
     }
+}
+
 }

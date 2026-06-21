@@ -7,6 +7,8 @@
 
 #include <stdexcept>
 
+namespace wdk::core {
+
 Secret::Secret(const std::filesystem::path& secret_path) {
     nlohmann::json json_data = wdk::utilities::read(secret_path);
 
@@ -18,4 +20,6 @@ Secret::Secret(const std::filesystem::path& secret_path) {
         spdlog::critical("[Secret] Failed map JSON fields to internal registry: {}", e.what());
         throw std::runtime_error("[Secret] Failed to initialize secret");
     }
+}
+
 }

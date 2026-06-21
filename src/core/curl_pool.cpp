@@ -2,6 +2,8 @@
 
 #include <spdlog/spdlog.h>
 
+namespace wdk::core {
+
 CurlPool::CurlPool(size_t pool_size) {
     for (size_t i { 0uz }; i < pool_size; ++i) {
         CURL* handle = curl_easy_init();
@@ -55,4 +57,6 @@ void CurlPool::release(CURL* handle) {
     }
     
     condition_.notify_one();
+}
+
 }

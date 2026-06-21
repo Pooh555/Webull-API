@@ -10,6 +10,8 @@
 #include <string_view>
 #include <vector>
 
+namespace wdk::client {
+
 struct MarketRequest {
     std::string           symbol          { "" };
     std::string           category        { "" };
@@ -36,10 +38,10 @@ struct TickData {
 class MarketClient {
 public:
     MarketClient(
-              CurlPool&        pool,
-        const Secret&          secret, 
-              std::string_view host, 
-              std::string_view token);
+              wdk::core::CurlPool& pool,
+        const wdk::core::Secret&   secret, 
+              std::string_view     host  = "", 
+              std::string_view     token = "");
     ~MarketClient() = default;
 
     MarketClient(const MarketClient&)            = delete;
@@ -51,8 +53,10 @@ public:
 private:
     static constexpr std::string_view TICK_PATH = "/openapi/market-data/stock/tick";
 
-          CurlPool&   pool_;  
-    const Secret&     secret_;
-          std::string host_      { "" };
-          std::string token_     { "" };
+          wdk::core::CurlPool& pool_;  
+    const wdk::core::Secret&   secret_;
+          std::string host_    { "" };
+          std::string token_   { "" };
 };
+
+}

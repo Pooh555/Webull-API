@@ -6,11 +6,13 @@
 #include <format>
 #include <memory>
 
+namespace wdk::client {
+
 MarketClient::MarketClient(
-          CurlPool&        pool,
-    const Secret&          secret,
-          std::string_view host,
-          std::string_view token)
+          wdk::core::CurlPool& pool,
+    const wdk::core::Secret&   secret,
+          std::string_view     host,
+          std::string_view     token)
     : pool_(pool),
       secret_(secret),
       host_(host),
@@ -81,4 +83,6 @@ std::future<wdk::utilities::Response> MarketClient::fetch_tick_data_async(const 
         "",
         token_
     );
+}
+
 }

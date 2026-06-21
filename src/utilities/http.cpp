@@ -15,15 +15,15 @@ size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp) {
 }
 
 Response execute_request(
-          CurlPool&        pool,
-    const Secret&          secret,
-          std::string_view host,
-          std::string_view path,
-          HttpMethod       method,
-          std::string_view body_str,
-          std::string_view token) {
-    CurlPool::CurlHandle curl_guard = pool.acquire();
-    CURL*                curl       = curl_guard.get();
+          wdk::core::CurlPool& pool,
+    const wdk::core::Secret&   secret,
+          std::string_view     host,
+          std::string_view     path,
+          HttpMethod           method,
+          std::string_view     body_str,
+          std::string_view     token) {
+    wdk::core::CurlPool::CurlHandle curl_guard = pool.acquire();
+    CURL*                           curl       = curl_guard.get();
 
     if (curl == nullptr) {
         spdlog::error("[Utilities] Failed to acquire a valid CURL handle from pool");
@@ -162,13 +162,13 @@ Response execute_request(
 }
 
 std::future<Response> execute_request_async(
-          CurlPool&        pool,
-    const Secret&          secret,
-          std::string_view host,
-          std::string_view path,
-          HttpMethod       method,
-          std::string      body_str, 
-          std::string      token) {
+          wdk::core::CurlPool& pool,
+    const wdk::core::Secret&   secret,
+          std::string_view     host,
+          std::string_view     path,
+          HttpMethod           method,
+          std::string          body_str,
+          std::string          token) {
     std::string host_str{ host };
     std::string path_str{ path };
 
@@ -196,11 +196,11 @@ std::future<Response> execute_request_async(
 }
 
 curl_slist* generate_headers(
-    const Secret&          secret,
-          std::string_view timestamp,
-          std::string_view nonce,
-          std::string_view signature,
-          std::string_view token) {
+    const wdk::core::Secret& secret,
+          std::string_view   timestamp,
+          std::string_view   nonce,
+          std::string_view   signature,
+          std::string_view   token) {
     curl_slist* raw_headers = nullptr;
     
     raw_headers = curl_slist_append(raw_headers, "Accept: application/json");

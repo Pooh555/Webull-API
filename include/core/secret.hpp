@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <string>
 
+namespace wdk::core {
+
 class Secret {
 public:
     Secret(const std::filesystem::path& secret_path);
@@ -19,3 +21,5 @@ private:
     std::string key    { "" };
     std::string secret { "" };
 };
+
+}
