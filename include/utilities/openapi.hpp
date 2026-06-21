@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-namespace utilities::openapi {
+namespace wdk::utilities {
 
 [[nodiscard]] std::string generate_signature(
           CURL*                                             curl,

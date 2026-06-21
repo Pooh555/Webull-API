@@ -16,7 +16,7 @@ MarketClient::MarketClient(
       host_(host),
       token_(token) {}
 
-utilities::http::Response MarketClient::fetch_tick_data(
+wdk::utilities::Response MarketClient::fetch_tick_data(
     const MarketRequest& request) {
     std::string path { TICK_PATH };
 
@@ -39,18 +39,18 @@ utilities::http::Response MarketClient::fetch_tick_data(
 
     append_parameter("trading_session", request.trading_session);
 
-    return utilities::http::execute_request(
+    return wdk::utilities::execute_request(
         pool_,
         secret_,
         host_,
         path,
-        utilities::http::HttpMethod::GET,
+        wdk::utilities::HttpMethod::GET,
         "",
         token_
     );
 }
 
-std::future<utilities::http::Response> MarketClient::fetch_tick_data_async(const MarketRequest& request) {
+std::future<wdk::utilities::Response> MarketClient::fetch_tick_data_async(const MarketRequest& request) {
     std::string path { TICK_PATH };
 
     bool first_parameter { true };
@@ -72,12 +72,12 @@ std::future<utilities::http::Response> MarketClient::fetch_tick_data_async(const
     
     append_parameter("trading_session", request.trading_session);
 
-    return utilities::http::execute_request_async(
+    return wdk::utilities::execute_request_async(
         pool_,
         secret_,
         host_,
         path,
-        utilities::http::HttpMethod::GET,
+        wdk::utilities::HttpMethod::GET,
         "",
         token_
     );

@@ -3,7 +3,7 @@
 #include <chrono>
 #include <format>
 
-namespace utilities::time {
+namespace wdk::utilities {
 
 std::string get_utc_timestamp() {
     std::chrono::utc_clock::time_point current_time = std::chrono::utc_clock::now();

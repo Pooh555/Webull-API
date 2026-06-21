@@ -57,3 +57,4 @@ echo "${YELLOW}============================================================${RES
 # --- Result Evaluation ---
 if [[ ${APP_EXIT_CODE} -eq 0 ]]; then
     log_success "Application finished successfully (Exit Code 0)."
+fi

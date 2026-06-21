@@ -7,14 +7,14 @@
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
-namespace utilities::http {
+namespace wdk::utilities {
 
 size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp) {
     static_cast<std::string*>(userp)->append(static_cast<const char*>(contents), size * nmemb);
     return size * nmemb;
 }
 
-utilities::http::Response execute_request(
+Response execute_request(
           CurlPool&        pool,
     const Secret&          secret,
           std::string_view host,
@@ -34,8 +34,8 @@ utilities::http::Response execute_request(
     curl_easy_setopt(curl, CURLOPT_HTTPGET, method == HttpMethod::POST ? 0L : 1L);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, nullptr);
 
-    const std::string timestamp = utilities::time::get_utc_timestamp();
-    const std::string nonce     = utilities::cryptography::generate_nonce(26uz);
+    const std::string timestamp = get_utc_timestamp();
+    const std::string nonce     = generate_nonce(26uz);
 
     std::string request_path { path };
 
@@ -76,7 +76,7 @@ utilities::http::Response execute_request(
         }
     }
 
-    const std::string signature = utilities::openapi::generate_signature(
+    const std::string signature = generate_signature(
         curl,
         secret.get_key(),
         secret.get_secret(),

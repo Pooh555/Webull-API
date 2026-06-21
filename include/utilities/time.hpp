@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace utilities::time {
+namespace wdk::utilities {
 
 [[nodiscard]] std::string get_utc_timestamp();
 

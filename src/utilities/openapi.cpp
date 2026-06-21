@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <ranges> 
 
-namespace utilities::openapi {
+namespace wdk::utilities {
     
 std::string generate_signature(
           CURL* curl,
@@ -44,7 +44,7 @@ std::string generate_signature(
     std::string sign_string = std::string(request_path) + "&" + canonical;
 
     if (!request_body.empty()) {
-        sign_string += "&" + utilities::cryptography::compute_md5(request_body);
+        sign_string += "&" + compute_md5(request_body);
     }
 
     char* escaped             = curl_easy_escape(curl, sign_string.c_str(), static_cast<int>(sign_string.size()));
@@ -54,7 +54,7 @@ std::string generate_signature(
 
     std::string signing_key = std::string(app_secret) + "&";
    
-    return utilities::cryptography::compute_hmac_sha1(signing_key, encoded_sign_string);
+    return compute_hmac_sha1(signing_key, encoded_sign_string);
 }
 
 }

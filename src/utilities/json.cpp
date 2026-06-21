@@ -4,7 +4,7 @@
 
 #include <fstream>
 
-namespace utilities::json {
+namespace wdk::utilities {
 
 nlohmann::json read(const std::filesystem::path& input_path) {
     if (!std::filesystem::exists(input_path)) {

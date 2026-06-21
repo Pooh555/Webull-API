@@ -45,9 +45,9 @@ public:
     MarketClient(const MarketClient&)            = delete;
     MarketClient& operator=(const MarketClient&) = delete;
 
-    [[nodiscard]] utilities::http::Response fetch_tick_data(const MarketRequest& request);
+    [[nodiscard]] wdk::utilities::Response fetch_tick_data(const MarketRequest& request);
 
-    [[nodiscard]] std::future<utilities::http::Response> fetch_tick_data_async(const MarketRequest& request);
+    [[nodiscard]] std::future<wdk::utilities::Response> fetch_tick_data_async(const MarketRequest& request);
 private:
     static constexpr std::string_view TICK_PATH = "/openapi/market-data/stock/tick";
 

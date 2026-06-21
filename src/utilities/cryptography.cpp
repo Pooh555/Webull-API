@@ -1,4 +1,4 @@
-#include "utilities/cryptography.hpp"
+#include <utilities/cryptography.hpp>
 
 #include <spdlog/spdlog.h>
 #include <openssl/bio.h>
@@ -12,7 +12,7 @@
 #include <iomanip>
 #include <random>
 
-namespace utilities::cryptography {
+namespace wdk::utilities {
 
 std::string compute_hmac_sha1(std::string_view key, std::string_view message) {
     unsigned char hash[EVP_MAX_MD_SIZE];

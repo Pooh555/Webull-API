@@ -8,7 +8,7 @@
 #include <utility>
 #include <future>  
 
-namespace utilities::http {
+namespace wdk::utilities {
 
 enum class HttpMethod : bool {
     GET  = false,

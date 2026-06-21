@@ -3,7 +3,7 @@
 #include <string>
 #include <string_view>
 
-namespace utilities::cryptography {
+namespace wdk::utilities {
 
 [[nodiscard]] std::string compute_hmac_sha1(std::string_view key, std::string_view message);
 [[nodiscard]] std::string compute_md5(std::string_view data);
