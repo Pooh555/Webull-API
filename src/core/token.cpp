@@ -34,11 +34,18 @@ Token::Token(
 
         generate(pool, credentials, host); 
 
-        while (get_status() == "PENDING") {
+        static constexpr int64_t MAX_WAIT_TIME { 300 };
+                         int64_t accumulated_pending_time { 0 };
+
+        while (get_status() == "PENDING" && accumulated_pending_time < MAX_WAIT_TIME) {
+            int64_t interval { 5 };
+
             spdlog::info("[Token] Token is PENDING. Please open your Webull Mobile App to approve the login");
-            std::this_thread::sleep_for(std::chrono::seconds(5));
+            std::this_thread::sleep_for(std::chrono::seconds(interval));
             
             verify(pool, credentials, host);
+
+            accumulated_pending_time += interval;
         }
     }
 
