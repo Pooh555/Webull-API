@@ -157,6 +157,24 @@ void Application::trading_demo() {
     // Extract account id
     const std::string account_id = client.get_account_id();
 
+    // Fetch stock instrument
+    spdlog::info("[Application] Fetching stock instrument...");
+    
+    std::future<wdk::utilities::Response> stock_instrument_future = client.fetch_stock_instrument_async({
+        .symbols            { "AAPL,NVDA" },
+        .category           { "US_STOCK" },
+        .status             { "OC" },
+        .last_instrument_id { "951007842" },
+        .page_size          { 10uz }
+    });
+    wdk::utilities::Response stock_instrument_data = stock_instrument_future.get();
+    
+    if (stock_instrument_data.http_code == 200L) {
+        spdlog::info("[Application] Successfully fetched stock instrument:\n {}", nlohmann::json::parse(stock_instrument_data.message).dump(4));
+    } else {
+        spdlog::error("[Application] Failed to fetched stock instrument:\n {}", nlohmann::json::parse(stock_instrument_data.message).dump(4));
+    }
+
     // Fetch account balance
     spdlog::info("[Application] Dispatching balance request...");
 

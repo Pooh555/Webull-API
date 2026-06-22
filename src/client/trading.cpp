@@ -121,6 +121,7 @@ std::future<wdk::utilities::Response> TradingClient::place_order_async(const Ord
         {"time_in_force",           request.time_in_force},
         {"side",                    request.side}
     };
+
     if (request.quantity)    order_item["quantity"]    = std::format("{}", *request.quantity);
     if (request.limit_price) order_item["limit_price"] = std::format("{:.2f}", *request.limit_price);
     if (request.stop_price)  order_item["stop_price"]  = std::format("{:.2f}", *request.stop_price);
@@ -137,6 +138,7 @@ wdk::utilities::Response TradingClient::modify_order(const OrderRequest& request
     nlohmann::json modify_item {
         {"client_order_id", request.client_order_id}
     };
+
     if (request.quantity)               modify_item["quantity"]      = std::format("{}", *request.quantity);
     if (request.limit_price)            modify_item["limit_price"]   = std::format("{:.2f}", *request.limit_price);
     if (request.stop_price)             modify_item["stop_price"]    = std::format("{:.2f}", *request.stop_price);
@@ -161,6 +163,7 @@ std::future<wdk::utilities::Response> TradingClient::modify_order_async(const Or
     nlohmann::json modify_item {
         {"client_order_id", request.client_order_id}
     };
+
     if (request.quantity)               modify_item["quantity"]      = std::format("{}", *request.quantity);
     if (request.limit_price)            modify_item["limit_price"]   = std::format("{:.2f}", *request.limit_price);
     if (request.stop_price)             modify_item["stop_price"]    = std::format("{:.2f}", *request.stop_price);
@@ -199,34 +202,62 @@ std::future<wdk::utilities::Response> TradingClient::cancel_order_async(const Or
     return execute_request_async(std::string{ CANCEL_ORDER_PATH }, wdk::utilities::HttpMethod::POST, root_payload.dump());
 }
 
-std::string TradingClient::get_account_id() {
-    if (!account_id_.empty()) return account_id_;
+wdk::utilities::Response TradingClient::fetch_stock_instrument(const QueryRequest& request) {
+    std::string path { STOCK_INSTRUMMENT_PATH };
 
-    std::string account_list_json = fetch_account_list_async().get().message;
-    std::string extracted_account_id = "";
-    try {
-        if (!account_list_json.empty()) {
-            auto parsed_response = nlohmann::json::parse(account_list_json);
-            if (parsed_response.is_array() && !parsed_response.empty()) {
-                extracted_account_id = parsed_response[0].value("account_id", "");
-            } else if (parsed_response.contains("data") && parsed_response["data"].is_array() && !parsed_response["data"].empty()) {
-                extracted_account_id = parsed_response["data"][0].value("account_id", "");
-            }
-        }
-    } catch (const nlohmann::json::parse_error& e) {
-        spdlog::error("[TradingClient] Failed to parse account listing JSON metrics: {}", e.what());
-        return "";
+    bool first_parameter { true };
+
+    auto append_parameter = [&](std::string_view key, std::string_view value) {
+        if (value.empty()) return;
+
+        path           += first_parameter ? '?' : '&';
+        path           += std::format("{}={}", key, value);
+        first_parameter = false;
+    };
+
+    append_parameter("symbols", request.symbols);
+    append_parameter("category", request.category);
+    append_parameter("status", request.status); 
+    append_parameter("last_instrument_id", request.last_instrument_id); 
+   
+    if (request.page_size.has_value()) {
+        append_parameter("page_size", std::to_string(request.page_size.value()));
     }
 
-    if (extracted_account_id.empty()) {
-        spdlog::error("[TradingClient] Could not determine a valid account ID target mapping");
+    return wdk::utilities::execute_request(
+        pool_,
+        credentials_,
+        host_,
+        path,
+        wdk::utilities::HttpMethod::GET,
+        "",
+        token_
+    );
+}
+
+std::future<wdk::utilities::Response> TradingClient::fetch_stock_instrument_async(const QueryRequest& request) {
+    std::string path { STOCK_INSTRUMMENT_PATH };
+
+    bool first_parameter { true };
+
+    auto append_parameter = [&](std::string_view key, std::string_view value) {
+        if (value.empty()) return;
+
+        path           += first_parameter ? '?' : '&';
+        path           += std::format("{}={}", key, value);
+        first_parameter = false;
+    };
+
+    append_parameter("symbols", request.symbols);
+    append_parameter("category", request.category);
+    append_parameter("status", request.status); 
+    append_parameter("last_instrument_id", request.last_instrument_id); 
+   
+    if (request.page_size.has_value()) {
+        append_parameter("page_size", std::to_string(request.page_size.value()));
     }
-
-    spdlog::info("[TradingClient] Successfully retrieved account ID");
-
-    account_id_ = extracted_account_id;
-
-    return account_id_;
+    
+    return execute_request_async(path, wdk::utilities::HttpMethod::GET);
 }
 
 wdk::utilities::Response TradingClient::fetch_order_history(const QueryRequest& request) {
@@ -382,26 +413,6 @@ std::future<wdk::utilities::Response> TradingClient::fetch_order_detail_async(co
     return execute_request_async(path, wdk::utilities::HttpMethod::GET);
 }
 
-wdk::utilities::Response TradingClient::fetch_account_list() {
-    return wdk::utilities::execute_request(
-        pool_,
-        credentials_,
-        host_,
-        ACCOUNT_LIST_PATH,
-        wdk::utilities::HttpMethod::GET,
-        "",
-        token_
-    );
-}
-
-std::future<wdk::utilities::Response> TradingClient::fetch_account_list_async() {
-    return execute_request_async(
-        std::string{ ACCOUNT_LIST_PATH },
-        wdk::utilities::HttpMethod::GET,
-        ""
-    );
-}
-
 wdk::utilities::Response TradingClient::fetch_account_balance(const std::string& account_id) {
     if (account_id.empty()) {
         spdlog::error("[TradingClient] Failed to fetch account balance: account_id is empty");
@@ -476,6 +487,56 @@ std::future<wdk::utilities::Response> TradingClient::fetch_account_position_asyn
     std::string path = std::format("{}?account_id={}", ACCOUNT_POSITION_PATH, account_id);
 
     return execute_request_async(path, wdk::utilities::HttpMethod::GET, "");
+}
+
+std::string TradingClient::get_account_id() {
+    if (!account_id_.empty()) return account_id_;
+
+    std::string account_list_json = fetch_account_list_async().get().message;
+    std::string extracted_account_id = "";
+    try {
+        if (!account_list_json.empty()) {
+            auto parsed_response = nlohmann::json::parse(account_list_json);
+            if (parsed_response.is_array() && !parsed_response.empty()) {
+                extracted_account_id = parsed_response[0].value("account_id", "");
+            } else if (parsed_response.contains("data") && parsed_response["data"].is_array() && !parsed_response["data"].empty()) {
+                extracted_account_id = parsed_response["data"][0].value("account_id", "");
+            }
+        }
+    } catch (const nlohmann::json::parse_error& e) {
+        spdlog::error("[TradingClient] Failed to parse account listing JSON metrics: {}", e.what());
+        return "";
+    }
+
+    if (extracted_account_id.empty()) {
+        spdlog::error("[TradingClient] Could not determine a valid account ID target mapping");
+    }
+
+    spdlog::info("[TradingClient] Successfully retrieved account ID");
+
+    account_id_ = extracted_account_id;
+
+    return account_id_;
+}
+
+wdk::utilities::Response TradingClient::fetch_account_list() {
+    return wdk::utilities::execute_request(
+        pool_,
+        credentials_,
+        host_,
+        ACCOUNT_LIST_PATH,
+        wdk::utilities::HttpMethod::GET,
+        "",
+        token_
+    );
+}
+
+std::future<wdk::utilities::Response> TradingClient::fetch_account_list_async() {
+    return execute_request_async(
+        std::string{ ACCOUNT_LIST_PATH },
+        wdk::utilities::HttpMethod::GET,
+        ""
+    );
 }
 
 std::future<wdk::utilities::Response> TradingClient::execute_request_async(

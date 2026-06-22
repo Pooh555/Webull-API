@@ -29,11 +29,15 @@ struct OrderRequest {
 };
 
 struct QueryRequest {
-    std::string           account_id      { "" };
-    std::string           start_date      { "" };
-    std::optional<size_t> page_size       { std::nullopt };
-    std::string           last_client_id  { "" };
-    std::string           client_order_id { "" };
+    std::string           symbols            { "" };
+    std::string           category           { "" };
+    std::string           status             { "" };
+    std::string           last_instrument_id { "" };
+    std::string           account_id         { "" };
+    std::string           start_date         { "" };
+    std::optional<size_t> page_size          { std::nullopt };
+    std::string           last_client_id     { "" };
+    std::string           client_order_id    { "" };
 };
 
 class TradingClient {
@@ -46,38 +50,42 @@ public:
               std::string_view        token);
     ~TradingClient() = default;
 
-    wdk::utilities::Response              preview_order(const OrderRequest& request);
-    std::future<wdk::utilities::Response> preview_order_async(const OrderRequest& request);
-    wdk::utilities::Response              place_order(const OrderRequest& request);
-    std::future<wdk::utilities::Response> place_order_async(const OrderRequest& request);
-    wdk::utilities::Response              modify_order(const OrderRequest& request);
-    std::future<wdk::utilities::Response> modify_order_async(const OrderRequest& request);
-    wdk::utilities::Response              cancel_order(const OrderRequest& request);
-    std::future<wdk::utilities::Response> cancel_order_async(const OrderRequest& request);
+    [[nodiscard]] wdk::utilities::Response              preview_order(const OrderRequest& request);
+    [[nodiscard]] std::future<wdk::utilities::Response> preview_order_async(const OrderRequest& request);
+    [[nodiscard]] wdk::utilities::Response              place_order(const OrderRequest& request);
+    [[nodiscard]] std::future<wdk::utilities::Response> place_order_async(const OrderRequest& request);
+    [[nodiscard]] wdk::utilities::Response              modify_order(const OrderRequest& request);
+    [[nodiscard]] std::future<wdk::utilities::Response> modify_order_async(const OrderRequest& request);
+    [[nodiscard]] wdk::utilities::Response              cancel_order(const OrderRequest& request);
+    [[nodiscard]] std::future<wdk::utilities::Response> cancel_order_async(const OrderRequest& request);
 
+    [[nodiscard]] wdk::utilities::Response              fetch_stock_instrument(const QueryRequest& request);
+    [[nodiscard]] std::future<wdk::utilities::Response> fetch_stock_instrument_async(const QueryRequest& request);
     [[nodiscard]] wdk::utilities::Response              fetch_order_history(const QueryRequest& request);
     [[nodiscard]] std::future<wdk::utilities::Response> fetch_order_history_async(const QueryRequest& request);
     [[nodiscard]] wdk::utilities::Response              fetch_open_order(const QueryRequest& request);
     [[nodiscard]] std::future<wdk::utilities::Response> fetch_open_order_async(const QueryRequest& request);
     [[nodiscard]] wdk::utilities::Response              fetch_order_detail(const QueryRequest& request);
     [[nodiscard]] std::future<wdk::utilities::Response> fetch_order_detail_async(const QueryRequest& request);
-
-    [[nodiscard]] std::string                           get_account_id();
-    [[nodiscard]] wdk::utilities::Response              fetch_account_list();
-    [[nodiscard]] std::future<wdk::utilities::Response> fetch_account_list_async();
+    
     [[nodiscard]] wdk::utilities::Response              fetch_account_balance(const std::string& account_id);
     [[nodiscard]] std::future<wdk::utilities::Response> fetch_account_balance_async(const std::string& account_id);
     [[nodiscard]] wdk::utilities::Response              fetch_account_position(const std::string& account_id);
-    [[nodiscard]] std::future<wdk::utilities::Response> fetch_account_position_async(const std::string& account_id);    
+    [[nodiscard]] std::future<wdk::utilities::Response> fetch_account_position_async(const std::string& account_id);
+    
+    [[nodiscard]] std::string                           get_account_id();
+    [[nodiscard]] wdk::utilities::Response              fetch_account_list();
+    [[nodiscard]] std::future<wdk::utilities::Response> fetch_account_list_async();
 private:    
     static constexpr std::string_view PREVIEW_ORDER_PATH { "/openapi/trade/order/preview" };
     static constexpr std::string_view PLACE_ORDER_PATH   { "/openapi/trade/order/place" };
     static constexpr std::string_view MODIFY_ORDER_PATH  { "/openapi/trade/order/replace" };
     static constexpr std::string_view CANCEL_ORDER_PATH  { "/openapi/trade/order/cancel" };
 
-    static constexpr std::string_view ORDER_HISTORY_PATH { "/openapi/trade/order/history" };
-    static constexpr std::string_view OPEN_ORDER_PATH    { "/openapi/trade/order/open" };
-    static constexpr std::string_view ORDER_DETAIL_PATH  { "/openapi/trade/order/detail" };
+    static constexpr std::string_view STOCK_INSTRUMMENT_PATH { "/openapi/instrument/stock/list" };
+    static constexpr std::string_view ORDER_HISTORY_PATH     { "/openapi/trade/order/history" };
+    static constexpr std::string_view OPEN_ORDER_PATH        { "/openapi/trade/order/open" };
+    static constexpr std::string_view ORDER_DETAIL_PATH      { "/openapi/trade/order/detail" };
 
     static constexpr std::string_view ACCOUNT_LIST_PATH     { "/openapi/account/list" };
     static constexpr std::string_view ACCOUNT_BALANCE_PATH  { "/openapi/assets/balance" };
