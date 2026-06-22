@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/curl_pool.hpp"
+#include "core/thread_pool.hpp"
 #include "core/credentials.hpp"
 #include "core/token.hpp"
 #include "utilities/http.hpp"
@@ -39,6 +40,7 @@ class MarketClient {
 public:
     MarketClient(
               wdk::core::CurlPool&    pool,
+              wdk::core::ThreadPool&  thread_pool,
         const wdk::core::Credentials& credentials, 
               std::string_view        host  = "", 
               std::string_view        token = "");
@@ -54,9 +56,15 @@ private:
     static constexpr std::string_view TICK_PATH = "/openapi/market-data/stock/tick";
 
           wdk::core::CurlPool&    pool_;  
+          wdk::core::ThreadPool&  thread_pool_;
     const wdk::core::Credentials& credentials_;
           std::string host_       { "" };
           std::string token_      { "" };
+
+    [[nodiscard]] std::future<wdk::utilities::Response> execute_request_async(
+        std::string                path,
+        wdk::utilities::HttpMethod method,
+        std::string                body_str = "");
 };
 
 }

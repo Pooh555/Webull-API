@@ -3,6 +3,7 @@
 #include <client/market.hpp>
 #include <core/credentials.hpp>
 #include <core/curl_pool.hpp>
+#include <core/thread_pool.hpp>
 #include <core/token.hpp>
 
 #include <memory>
@@ -26,6 +27,7 @@ private:
     static constexpr std::string_view CREDENTIALS_PATH { "/home/Pooh555/programming/Webull-SDK/examples/res/credentials.json" };
 
     std::unique_ptr<wdk::core::CurlPool>    curl_pool;
+    std::unique_ptr<wdk::core::ThreadPool>  thread_pool;
     std::unique_ptr<wdk::core::Credentials> credentials;
     std::unique_ptr<wdk::core::Token>       token;
 

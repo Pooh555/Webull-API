@@ -21,6 +21,8 @@ add_library(Webull-SDK STATIC
     
     src/core/credentials.cpp
     src/core/curl_pool.cpp
+    src/core/rate_limiter.cpp
+    src/core/thread_pool.cpp
     src/core/token.cpp
     
     src/utilities/cryptography.cpp

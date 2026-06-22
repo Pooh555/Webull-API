@@ -24,12 +24,17 @@ public:
     [[nodiscard]] CurlHandle acquire();
 
 private:
+    static void share_lock(CURL* handle, curl_lock_data data, curl_lock_access access, void* userptr);
+    static void share_unlock(CURL* handle, curl_lock_data data, void* userptr);
+    
     void release(CURL* handle);
 
     std::queue<CURL*>       handles_;
     std::mutex              mutex_;
     std::condition_variable condition_;
-    bool                    shutdown_  { false };
+    bool                    shutdown_     { false };
+    CURLSH*                 share_handle_ { nullptr };
+    std::mutex              share_mutex_;
 };
 
 }

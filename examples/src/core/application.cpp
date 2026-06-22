@@ -15,6 +15,7 @@ Application::Application() {
     static constexpr size_t connections { 10uz };
 
     curl_pool   = std::make_unique<wdk::core::CurlPool>(connections);
+    thread_pool = std::make_unique<wdk::core::ThreadPool>();
     credentials = std::make_unique<wdk::core::Credentials>(CREDENTIALS_PATH);
     token       = std::make_unique<wdk::core::Token>(TOKEN_PATH, *curl_pool.get(), *credentials.get(), HOST);
 }
@@ -26,6 +27,7 @@ void Application::run() {
 void Application::demo() {
     wdk::client::TradingClient client(
         *curl_pool, 
+        *thread_pool,
         *credentials.get(), 
         HOST, 
         token->get_handle()
@@ -122,6 +124,7 @@ void Application::demo() {
 
     wdk::client::MarketClient market_client(
         *curl_pool,
+        *thread_pool,
         *credentials,
         HOST,
         token->get_handle()
