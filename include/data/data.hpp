@@ -1,70 +1,70 @@
 #pragma once
 
 #include <utilities/http.hpp>
-
 #include <nlohmann/json.hpp>
 
 #include <string>
 #include <vector>
+#include <map>
 
 namespace wdk::data {
 
 struct TickData {
     std::string symbol           { "" };
     std::string instrument_id    { "" };
-    std::string volume           { "" };
+    double      volume           { 0.0 };
     std::string side             { "" };
     std::string trading_sessions { "" };
 };
 
 struct SnapshotData {
     std::string instrument_id                 { "" };
-    std::string pre_close                     { "" };
-    std::string change_ratio                  { "" };
+    double      pre_close                     { 0.0 };
+    double      change_ratio                  { 0.0 };
     std::string symbol                        { "" };
 
-    size_t last_trade_time                    { 0uz };
+    size_t      last_trade_time               { 0uz };
 
-    std::string price                         { "" };
-    std::string open                          { "" };
-    std::string close                         { "" };
-    std::string high                          { "" };
-    std::string low                           { "" };
-    std::string volume                        { "" };
-    std::string change                        { "" };
+    double      price                         { 0.0 };
+    double      open                          { 0.0 };
+    double      close                         { 0.0 };
+    double      high                          { 0.0 };
+    double      low                           { 0.0 };
+    double      volume                        { 0.0 };
+    double      change                        { 0.0 };
 
-    std::string ask                           { "" };
-    std::string ask_size                      { "" };
-    std::string bid                           { "" };
-    std::string bid_size                      { "" };
+    double      ask                           { 0.0 };
+    double      ask_size                      { 0.0 };
+    double      bid                           { 0.0 };
+    double      bid_size                      { 0.0 };
 
-    std::string extend_hour_last_price        { "" };
-    std::string extend_hour_high              { "" };
-    std::string extend_hour_low               { "" };
-    std::string extend_hour_change            { "" };
-    std::string extend_hour_change_ratio      { "" };
-    std::string extend_hour_volume            { "" };
+    double      extend_hour_last_price        { 0.0 };
+    double      extend_hour_high              { 0.0 };
+    double      extend_hour_low               { 0.0 };
+    double      extend_hour_change            { 0.0 };
+    double      extend_hour_change_ratio      { 0.0 };
+    double      extend_hour_volume            { 0.0 };
 
-    size_t extend_hour_last_trade_time        { 0uz };
+    size_t      extend_hour_last_trade_time   { 0uz };
 
-    std::string ovn_price                     { "" };
-    std::string ovn_high                      { "" };
-    std::string ovn_low                       { "" };
-    std::string ovn_volume                    { "" };
-    std::string ovn_change                    { "" };
-    std::string ovn_change_ratio              { "" };
+    double      ovn_price                     { 0.0 };
+    double      ovn_high                      { 0.0 };
+    double      ovn_low                       { 0.0 };
+    double      ovn_volume                    { 0.0 };
+    double      ovn_change                    { 0.0 };
+    double      ovn_change_ratio              { 0.0 };
 
-    size_t ovn_last_trade_time                { 0uz };
+    size_t      ovn_last_trade_time           { 0uz };
 
-    std::string ovn_ask                       { "" };
-    std::string ovn_ask_size                  { "" };
-    std::string ovn_bid                       { "" };
-    std::string ovn_bid_size                  { "" };
+    double      ovn_ask                       { 0.0 };
+    double      ovn_ask_size                  { 0.0 };
+    double      ovn_bid                       { 0.0 };
+    double      ovn_bid_size                  { 0.0 };
 };
 
 struct QuoteLevel {
-    std::string price { "" };
-    std::string size  { "" };
+    double      price { 0.0 };
+    double      size  { 0.0 };
 };
 
 struct QuotesData {
@@ -72,20 +72,20 @@ struct QuotesData {
     std::string             instrument_id { "" };
     size_t                  quote_time    { 0uz };
     
-    std::vector<QuoteLevel> asks          {};
-    std::vector<QuoteLevel> bids          {};
+    std::vector<QuoteLevel> asks {};
+    std::vector<QuoteLevel> bids {};
 };
 
 struct FootPrintBar {
     std::string time            { "" };
     std::string trading_session { "" };
-    std::string total           { "" };
-    std::string delta           { "" };
-    std::string buy_total       { "" };
-    std::string sell_total      { "" };
+    double      total           { 0.0 };
+    double      delta           { 0.0 };
+    double      buy_total       { 0.0 };
+    double      sell_total      { 0.0 };
 
-    std::map<std::string, std::string> buy_detail  {};
-    std::map<std::string, std::string> sell_detail {};
+    std::map<std::string, double> buy_detail  {};
+    std::map<std::string, double> sell_detail {};
 };
 
 struct FootPrintData {
@@ -122,4 +122,4 @@ struct HistoricalBarsData {
 [[nodiscard]] FootPrintData parse_footprint_node(const nlohmann::json& node);
 [[nodiscard]] Bar           parse_bar_node(const nlohmann::json& node);
 
-}
+} 

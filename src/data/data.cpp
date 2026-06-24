@@ -1,6 +1,9 @@
 #include <data/data.hpp>
+
 #include <utilities/json.hpp>
+
 #include <spdlog/spdlog.h>
+
 #include <string>
 
 namespace wdk::data {
@@ -11,6 +14,7 @@ TickData convert_response_to_tick_data(wdk::utilities::Response response) {
     if (response.message.empty()) return data;
 
     auto json_root = nlohmann::json::parse(response.message, nullptr, false);
+    
     if (json_root.is_discarded()) return data;
 
     data.symbol        = wdk::utilities::get_string_from_json(json_root, "symbol");
@@ -18,7 +22,7 @@ TickData convert_response_to_tick_data(wdk::utilities::Response response) {
 
     if (json_root.contains("result") && json_root["result"].is_array() && !json_root["result"].empty()) {
         const auto& latest_tick = json_root["result"][0];
-        data.volume           = wdk::utilities::get_string_from_json(latest_tick, "volume");
+        data.volume           = wdk::utilities::get_double_from_json(latest_tick, "volume");
         data.side             = wdk::utilities::get_string_from_json(latest_tick, "side");
         data.trading_sessions = wdk::utilities::get_string_from_json(latest_tick, "trading_session");
     }
@@ -121,8 +125,8 @@ QuotesData convert_response_to_quotes_data(wdk::utilities::Response response) {
         for (const auto& item : json_root["asks"]) {
             QuoteLevel level {};
 
-            level.price = wdk::utilities::get_string_from_json(item, "price");
-            level.size  = wdk::utilities::get_string_from_json(item, "size");
+            level.price = wdk::utilities::get_double_from_json(item, "price");
+            level.size  = wdk::utilities::get_double_from_json(item, "size");
 
             data.asks.push_back(level);
         }
@@ -134,8 +138,8 @@ QuotesData convert_response_to_quotes_data(wdk::utilities::Response response) {
         for (const auto& item : json_root["bids"]) {
             QuoteLevel level {};
 
-            level.price = wdk::utilities::get_string_from_json(item, "price");
-            level.size  = wdk::utilities::get_string_from_json(item, "size");
+            level.price = wdk::utilities::get_double_from_json(item, "price");
+            level.size  = wdk::utilities::get_double_from_json(item, "size");
             
             data.bids.push_back(level);
         }
@@ -215,47 +219,47 @@ std::vector<HistoricalBarsData> convert_response_to_historical_bars_vector(wdk::
 SnapshotData parse_snapshot_node(const nlohmann::json& node) {
     return {
         .instrument_id = wdk::utilities::get_string_from_json(node, "instrument_id"),
-        .pre_close     = wdk::utilities::get_string_from_json(node, "pre_close"),
-        .change_ratio  = wdk::utilities::get_string_from_json(node, "change_ratio"),
+        .pre_close     = wdk::utilities::get_double_from_json(node, "pre_close"),
+        .change_ratio  = wdk::utilities::get_double_from_json(node, "change_ratio"),
         .symbol        = wdk::utilities::get_string_from_json(node, "symbol"),
         
         .last_trade_time = wdk::utilities::get_size_t_from_json(node, "last_trade_time"),
 
-        .price  = wdk::utilities::get_string_from_json(node, "price"),
-        .open   = wdk::utilities::get_string_from_json(node, "open"),
-        .close  = wdk::utilities::get_string_from_json(node, "close"),
-        .high   = wdk::utilities::get_string_from_json(node, "high"),
-        .low    = wdk::utilities::get_string_from_json(node, "low"),
-        .volume = wdk::utilities::get_string_from_json(node, "volume"),
-        .change = wdk::utilities::get_string_from_json(node, "change"),
+        .price  = wdk::utilities::get_double_from_json(node, "price"),
+        .open   = wdk::utilities::get_double_from_json(node, "open"),
+        .close  = wdk::utilities::get_double_from_json(node, "close"),
+        .high   = wdk::utilities::get_double_from_json(node, "high"),
+        .low    = wdk::utilities::get_double_from_json(node, "low"),
+        .volume = wdk::utilities::get_double_from_json(node, "volume"),
+        .change = wdk::utilities::get_double_from_json(node, "change"),
 
-        .ask      = wdk::utilities::get_string_from_json(node, "ask"),
-        .ask_size = wdk::utilities::get_string_from_json(node, "ask_size"),
-        .bid      = wdk::utilities::get_string_from_json(node, "bid"),
-        .bid_size = wdk::utilities::get_string_from_json(node, "bid_size"),
+        .ask      = wdk::utilities::get_double_from_json(node, "ask"),
+        .ask_size = wdk::utilities::get_double_from_json(node, "ask_size"),
+        .bid      = wdk::utilities::get_double_from_json(node, "bid"),
+        .bid_size = wdk::utilities::get_double_from_json(node, "bid_size"),
 
-        .extend_hour_last_price   = wdk::utilities::get_string_from_json(node, "extend_hour_last_price"),
-        .extend_hour_high         = wdk::utilities::get_string_from_json(node, "extend_hour_high"),
-        .extend_hour_low          = wdk::utilities::get_string_from_json(node, "extend_hour_low"),
-        .extend_hour_change       = wdk::utilities::get_string_from_json(node, "extend_hour_change"),
-        .extend_hour_change_ratio = wdk::utilities::get_string_from_json(node, "extend_hour_change_ratio"),
-        .extend_hour_volume       = wdk::utilities::get_string_from_json(node, "extend_hour_volume"),
+        .extend_hour_last_price   = wdk::utilities::get_double_from_json(node, "extend_hour_last_price"),
+        .extend_hour_high         = wdk::utilities::get_double_from_json(node, "extend_hour_high"),
+        .extend_hour_low          = wdk::utilities::get_double_from_json(node, "extend_hour_low"),
+        .extend_hour_change       = wdk::utilities::get_double_from_json(node, "extend_hour_change"),
+        .extend_hour_change_ratio = wdk::utilities::get_double_from_json(node, "extend_hour_change_ratio"),
+        .extend_hour_volume       = wdk::utilities::get_double_from_json(node, "extend_hour_volume"),
         
         .extend_hour_last_trade_time = wdk::utilities::get_size_t_from_json(node, "extend_hour_last_trade_time"),
 
-        .ovn_price        = wdk::utilities::get_string_from_json(node, "ovn_price"),
-        .ovn_high         = wdk::utilities::get_string_from_json(node, "ovn_high"),
-        .ovn_low          = wdk::utilities::get_string_from_json(node, "ovn_low"),
-        .ovn_volume       = wdk::utilities::get_string_from_json(node, "ovn_volume"),
-        .ovn_change       = wdk::utilities::get_string_from_json(node, "ovn_change"),
-        .ovn_change_ratio = wdk::utilities::get_string_from_json(node, "ovn_change_ratio"),
+        .ovn_price        = wdk::utilities::get_double_from_json(node, "ovn_price"),
+        .ovn_high         = wdk::utilities::get_double_from_json(node, "ovn_high"),
+        .ovn_low          = wdk::utilities::get_double_from_json(node, "ovn_low"),
+        .ovn_volume       = wdk::utilities::get_double_from_json(node, "ovn_volume"),
+        .ovn_change       = wdk::utilities::get_double_from_json(node, "ovn_change"),
+        .ovn_change_ratio = wdk::utilities::get_double_from_json(node, "ovn_change_ratio"),
 
         .ovn_last_trade_time = wdk::utilities::get_size_t_from_json(node, "ovn_last_trade_time"),
 
-        .ovn_ask       = wdk::utilities::get_string_from_json(node, "ovn_ask"),
-        .ovn_ask_size  = wdk::utilities::get_string_from_json(node, "ovn_ask_size"),
-        .ovn_bid       = wdk::utilities::get_string_from_json(node, "ovn_bid"),
-        .ovn_bid_size  = wdk::utilities::get_string_from_json(node, "ovn_bid_size"),
+        .ovn_ask       = wdk::utilities::get_double_from_json(node, "ovn_ask"),
+        .ovn_ask_size  = wdk::utilities::get_double_from_json(node, "ovn_ask_size"),
+        .ovn_bid       = wdk::utilities::get_double_from_json(node, "ovn_bid"),
+        .ovn_bid_size  = wdk::utilities::get_double_from_json(node, "ovn_bid_size"),
     };
 }
 
@@ -272,23 +276,28 @@ FootPrintData parse_footprint_node(const nlohmann::json& node) {
             FootPrintBar bar {
                 .time            = wdk::utilities::get_string_from_json(item, "time"),
                 .trading_session = wdk::utilities::get_string_from_json(item, "trading_session"),
-                .total           = wdk::utilities::get_string_from_json(item, "total"),
-                .delta           = wdk::utilities::get_string_from_json(item, "delta"),
-                .buy_total       = wdk::utilities::get_string_from_json(item, "buy_total"),
-                .sell_total      = wdk::utilities::get_string_from_json(item, "sell_total")
+                .total           = wdk::utilities::get_double_from_json(item, "total"),
+                .delta           = wdk::utilities::get_double_from_json(item, "delta"),
+                .buy_total       = wdk::utilities::get_double_from_json(item, "buy_total"),
+                .sell_total      = wdk::utilities::get_double_from_json(item, "sell_total")
             };
 
             if (item.contains("buy_detail") && item["buy_detail"].is_object()) {
                 for (auto& [price, volume] : item["buy_detail"].items()) {
-                    if (volume.is_string()) {
-                        bar.buy_detail[price] = volume.get<std::string>();
+                    if (volume.is_number()) {
+                        bar.buy_detail[price] = volume.get<double>();
+                    } else if (volume.is_string()) {
+                        // Dynamically fall back to parsing if structural payload uses stringified numbers
+                        bar.buy_detail[price] = wdk::utilities::get_double_from_json(item["buy_detail"], price.c_str());
                     }
                 }
             }
             if (item.contains("sell_detail") && item["sell_detail"].is_object()) {
                 for (auto& [price, volume] : item["sell_detail"].items()) {
-                    if (volume.is_string()) {
-                        bar.sell_detail[price] = volume.get<std::string>();
+                    if (volume.is_number()) {
+                        bar.sell_detail[price] = volume.get<double>();
+                    } else if (volume.is_string()) {
+                        bar.sell_detail[price] = wdk::utilities::get_double_from_json(item["sell_detail"], price.c_str());
                     }
                 }
             }
