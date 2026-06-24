@@ -1,8 +1,7 @@
 #include <data/data.hpp>
-
 #include <utilities/json.hpp>
-
 #include <spdlog/spdlog.h>
+#include <string>
 
 namespace wdk::data {
 
@@ -304,11 +303,11 @@ FootPrintData parse_footprint_node(const nlohmann::json& node) {
 Bar parse_bar_node(const nlohmann::json& node) {
     return {
         .time            = wdk::utilities::get_string_from_json(node, "time"),
-        .open            = wdk::utilities::get_string_from_json(node, "open"),
-        .high            = wdk::utilities::get_string_from_json(node, "high"),
-        .low             = wdk::utilities::get_string_from_json(node, "low"),
-        .close           = wdk::utilities::get_string_from_json(node, "close"),
-        .volume          = wdk::utilities::get_string_from_json(node, "volume"),
+        .open            = wdk::utilities::get_double_from_json(node, "open"),
+        .high            = wdk::utilities::get_double_from_json(node, "high"),
+        .low             = wdk::utilities::get_double_from_json(node, "low"),
+        .close           = wdk::utilities::get_double_from_json(node, "close"),
+        .volume          = wdk::utilities::get_double_from_json(node, "volume"),
         .trading_session = wdk::utilities::get_string_from_json(node, "trading_session")
     };
 }

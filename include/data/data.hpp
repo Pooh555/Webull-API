@@ -96,11 +96,11 @@ struct FootPrintData {
 
 struct Bar {
     std::string time            { "" };
-    std::string open            { "" };
-    std::string high            { "" };
-    std::string low             { "" };
-    std::string close           { "" };
-    std::string volume          { "" };
+    double      open            { 0.0 };
+    double      high            { 0.0 };
+    double      low             { 0.0 };
+    double      close           { 0.0 };
+    double      volume          { 0.0 };
     std::string trading_session { "" };
 };
 

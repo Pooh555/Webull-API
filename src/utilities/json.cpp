@@ -63,6 +63,22 @@ std::string get_string_from_json(const nlohmann::json& json_obj, const char* key
     return "";
 }
 
+double get_double_from_json(const nlohmann::json& json_obj, const char* key) {
+    if (!json_obj.contains(key) || json_obj[key].is_null()) return 0.0;
+
+    if (json_obj[key].is_number()) return json_obj[key].get<double>();
+    if (json_obj[key].is_string()) {
+        const std::string str   { json_obj[key].get<std::string>() };
+        double            value { 0.0 };
+
+        auto [ptr, ec] { std::from_chars(str.data(), str.data() + str.size(), value) };
+        
+        if (ec == std::errc{}) return value;
+    }
+    
+    return 0.0;
+}
+
 size_t get_size_t_from_json(const nlohmann::json& json_obj, const char* key) {
     if (!json_obj.contains(key) || json_obj[key].is_null()) return 0uz;
     if (json_obj[key].is_number_integer())                  return json_obj[key].get<size_t>();
